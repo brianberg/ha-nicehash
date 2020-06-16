@@ -1,9 +1,7 @@
 default_config:
 
-automation: !include automations.yaml
-
 logger:
   default: error
   logs:
-    custom_components.blueprint: debug
+    custom_components.nicehash: debug
 
