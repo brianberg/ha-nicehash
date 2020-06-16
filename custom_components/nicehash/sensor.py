@@ -196,10 +196,10 @@ class NiceHashRigTemperatureSensor(Entity):
                 self._temps = []
                 for device in devices:
                     temp = int(device.get("temperature"))
-                    self._temps.append(temp)
                     if temp < 0:
                         # Ignore inactive devices
                         continue
+                    self._temps.append(temp)
                     if temp > highest_temp:
                         highest_temp = temp
                     return highest_temp
