@@ -13,6 +13,8 @@ from homeassistant.util import Throttle
 
 from .const import (
     CURRENCY_BTC,
+    CURRENCY_EUR,
+    CURRENCY_USD,
     DEFAULT_NAME,
     DOMAIN,
     ICON_CURRENCY_BTC,
@@ -33,23 +35,35 @@ async def async_setup_platform(
     """Setup NiceHash sensor platform"""
     _LOGGER.debug("Creating new NiceHash sensor components")
 
-    client = hass.data[DOMAIN]["client"]
-    currency = hass.data[DOMAIN]["currency"]
+    data = hass.data[DOMAIN]
+    client = data.get("client")
+    currency = data.get("currency")
+    accounts_coordinator = data.get("accounts_coordinator")
+    rigs_coordinator = data.get("rigs_coordinator")
 
-    # Add account balance sensor
-    async_add_entities(
-        [NiceHashBalanceSensor(client, currency, SCAN_INTERVAL_ACCOUNTS)], True
+    # Add account balance sensor(s)
+    btc_balance_sensor = NiceHashBalanceSensor(
+        accounts_coordinator, client.organization_id, CURRENCY_BTC
     )
+    if currency == CURRENCY_BTC:
+        async_add_entities([btc_balance_sensor], True)
+    else:
+        async_add_entities(
+            [
+                btc_balance_sensor,
+                NiceHashBalanceSensor(
+                    accounts_coordinator, client.organization_id, currency
+                ),
+            ],
+            True,
+        )
 
     # Add mining rig sensors
     rig_data = await client.get_mining_rigs()
     mining_rigs = rig_data["miningRigs"]
     # Add temperature sensors
     async_add_entities(
-        [
-            NiceHashRigTemperatureSensor(client, rig, SCAN_INTERVAL_RIGS)
-            for rig in mining_rigs
-        ],
+        [NiceHashRigTemperatureSensor(rigs_coordinator, rig) for rig in mining_rigs],
         True,
     )
 
@@ -57,25 +71,51 @@ async def async_setup_platform(
 class NiceHashBalanceSensor(Entity):
     """NiceHash Account Balance Sensor"""
 
-    def __init__(self, client, currency, update_frequency):
+    def __init__(self, coordinator, organization_id, currency):
         """Initialize the sensor"""
         _LOGGER.debug(f"Account Balance Sensor: {currency}")
-        self._client = client
-        self._public_client = NiceHashPublicClient()
-        self._currency = currency
-        self._state = None
-        self._last_update = None
-        self.async_update = Throttle(update_frequency)(self._async_update)
+        self.coordinator = coordinator
+        self.currency = currency
+        self._organization_id = organization_id
+        self._available = 0.00
+        self._pending = 0.00
+        self._total_balance = 0.00
+        self._exchange_rate = 0.00
 
     @property
     def name(self):
         """Sensor name"""
-        return f"{DEFAULT_NAME} Account Balance"
+        return f"{DEFAULT_NAME} Account Balance {self.currency}"
 
     @property
     def unique_id(self):
         """Unique entity id"""
-        return f"{self._client.organization_id}:{self._currency}"
+        return f"{self._organization_id}:{self.currency}"
+
+    @property
+    def should_poll(self):
+        """No need to pool, Coordinator notifies entity of updates"""
+        return False
+
+    @property
+    def available(self):
+        """Whether sensor is available"""
+        return self.coordinator.last_update_success
+
+    @property
+    def state(self):
+        """Sensor state"""
+        accounts = self.coordinator.data.get("accounts")
+        total = accounts.get("total")
+        self._pending = float(total.get("pending"))
+        self._available = float(total.get("available"))
+        self._total_balance = float(total.get("totalBalance"))
+        if self.currency == CURRENCY_BTC:
+            return self._available
+        else:
+            exchange_rates = self.coordinator.data.get("exchange_rates")
+            self._exchange_rate = exchange_rates.get(f"{CURRENCY_BTC}-{self.currency}")
+            return round(self._available * self._exchange_rate, 2)
 
     @property
     def icon(self):
@@ -83,56 +123,42 @@ class NiceHashBalanceSensor(Entity):
         return ICON_CURRENCY_BTC
 
     @property
-    def state(self):
-        """Sensor state"""
-        return self._state
-
-    @property
     def unit_of_measurement(self):
         """Sensor unit of measurement"""
-        return self._currency
+        return self.currency
 
     @property
     def device_state_attributes(self):
-        """Sensor device attributes"""
-        return {"last_update": self._last_update}
+        """Sensor device state attributes"""
+        return {
+            "total": self._total_balance,
+            "available": self._available,
+            "pending": self._pending,
+            "exchange_rate": self._exchange_rate,
+        }
 
-    async def _async_update(self):
+    async def async_added_to_hass(self):
+        """Connect to dispatcher listening for entity data notifications"""
+        self.async_on_remove(
+            self.coordinator.async_add_listener(self.async_write_ha_state)
+        )
 
-        try:
-            account_data = await self._client.get_accounts()
-            available = float(account_data["total"]["available"])
-
-            if self._currency == CURRENCY_BTC:
-                # Account balance is in BTC
-                self._state = available
-            else:
-                # Convert to selected currency via exchange rates
-                exchange_rates = await self._public_client.get_exchange_rates()
-                self._last_update = datetime.today().strftime(FORMAT_DATETIME)
-                for rate in exchange_rates:
-                    isBTC = rate["fromCurrency"] == CURRENCY_BTC
-                    toCurrency = rate["toCurrency"]
-                    if isBTC and toCurrency == self._currency:
-                        rate = float(rate["exchangeRate"])
-                        self._state = round(available * rate, 2)
-        except Exception as err:
-            _LOGGER.error(f"Unable to get account balance\n{err}")
-            pass
+    async def async_update(self):
+        """Update entity"""
+        await self.coordinator.async_request_refresh()
 
 
 class NiceHashRigTemperatureSensor(Entity):
     """NichHash Mining Rig Temperature Sensor"""
 
-    def __init__(self, client, rig, update_frequency):
+    def __init__(self, coordinator, rig):
         """Initialize the sensor"""
-        self._client = client
+        self.coordinator = coordinator
         self._rig_id = rig["rigId"]
         self._name = rig["name"]
+        self._temps = []
+        self._num_devices = 0
         _LOGGER.debug(f"Mining Rig Temperature Sensor: {self._name} ({self._rig_id})")
-        self._state = None
-        self._last_update = None
-        self.async_update = Throttle(update_frequency)(self._async_update)
 
     @property
     def name(self):
@@ -145,9 +171,45 @@ class NiceHashRigTemperatureSensor(Entity):
         return self._rig_id
 
     @property
+    def should_poll(self):
+        """No need to pool, Coordinator notifies entity of updates"""
+        return False
+
+    @property
+    def available(self):
+        """Whether sensor is available"""
+        return self.coordinator.last_update_success
+
+    @property
     def state(self):
         """Sensor state"""
-        return self._state
+        mining_rigs = self.coordinator.data.get("miningRigs")
+        try:
+            rig_data = mining_rigs.get(self._rig_id)
+            devices = rig_data.get("devices")
+            highest_temp = 0
+            num_devices = len(devices)
+            self._num_devices = num_devices
+
+            if num_devices > 0:
+                _LOGGER.debug(f"{self._name}: Found {num_devices} devices")
+                self._temps = []
+                for device in devices:
+                    temp = int(device.get("temperature"))
+                    self._temps.append(temp)
+                    if temp < 0:
+                        # Ignore inactive devices
+                        continue
+                    if temp > highest_temp:
+                        highest_temp = temp
+                    return highest_temp
+            else:
+                _LOGGER.debug(f"{self._name}: No devices found")
+                self._num_devices = 0
+                return 0
+        except Exception as e:
+            _LOGGER.error(f"Unable to get mining rig {self._rig_id}\n{e}")
+            return 0
 
     @property
     def icon(self):
@@ -161,32 +223,18 @@ class NiceHashRigTemperatureSensor(Entity):
 
     @property
     def device_state_attributes(self):
-        """Sensore device state attributes"""
+        """Sensor device state attributes"""
         return {
-            "last_update": self._last_update,
+            "temperatures": self._temps,
+            "num_devices": self._num_devices,
         }
 
-    async def _async_update(self):
-        try:
-            data = await self._client.get_mining_rig(self._rig_id)
-            self._last_update = datetime.today().strftime(FORMAT_DATETIME)
-            devices = data["devices"]
-            highest_temp = 0
+    async def async_added_to_hass(self):
+        """Connect to dispatcher listening for entity data notifications"""
+        self.async_on_remove(
+            self.coordinator.async_add_listener(self.async_write_ha_state)
+        )
 
-            if len(devices) > 0:
-                _LOGGER.debug(f"{self._name}: Found {len(devices)} devices")
-                for device in devices:
-                    temp = int(device["temperature"])
-                    if temp < 0:
-                        # Ignore inactive devices
-                        continue
-                    if temp > highest_temp:
-                        highest_temp = temp
-                    self._state = highest_temp
-            else:
-                _LOGGER.debug(f"{self._name}: No devices found")
-                self._state = None
-
-        except Exception as err:
-            _LOGGER.error(f"Unable to get mining rig {self._rig_id}\n{err}")
-            pass
+    async def async_update(self):
+        """Update entity"""
+        await self.coordinator.async_request_refresh()
