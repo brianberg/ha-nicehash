@@ -1,0 +1,13 @@
+{
+  "domain": "nicehash",
+  "name": "NiceHash",
+  "documentation": "https://github.com/brianberg/ha-nicehash",
+  "issue_tracker": "https://github.com/brianberg/ha-nicehash/issues",
+  "dependencies": [],
+  "codeowners": [
+    "@brianberg"
+  ],
+  "requirements": [
+    "requests_async"
+  ]
+}

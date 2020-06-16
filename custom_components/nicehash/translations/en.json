@@ -1,0 +1,32 @@
+{
+  "config": {
+    "title": "NiceHash",
+    "step": {
+      "user": {
+        "title": "NiceHash",
+        "description": "If you need help with the configuration have a look here: https://github.com/brianberg/ha-nicehash",
+        "data": {
+          "organization_id": "Organization ID",
+          "api_key": "API Key Code",
+          "api_secret": "API Secret Key Code"
+        }
+      }
+    },
+    "error": {
+      "auth": "Credentials are invalid",
+      "name_exists": "Configuration already exists"
+    },
+    "abort": {
+      "single_instance_allowed": "Only one instance of NiceHash is allowed"
+    }
+  },
+  "options": {
+    "step": {
+      "user": {
+        "data": {
+          "sensor": "Sensor enabled"
+        }
+      }
+    }
+  }
+}
