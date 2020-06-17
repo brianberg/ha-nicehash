@@ -14,7 +14,6 @@ from .const import (
     CURRENCY_EUR,
     CURRENCY_USD,
     DEFAULT_NAME,
-    DEVICE_STATUS_INACTIVE,
     ICON_CURRENCY_BTC,
     ICON_CURRENCY_EUR,
     ICON_CURRENCY_USD,
@@ -74,23 +73,28 @@ class NiceHashBalanceSensor(Entity):
         """Sensor state"""
         accounts = self.coordinator.data.get("accounts")
         total = accounts.get("total")
-        self._pending = float(total.get("pending"))
-        self._available = float(total.get("available"))
-        self._total_balance = float(total.get("totalBalance"))
-
-        if self.balance_type == BALANCE_TYPE_TOTAL:
-            balance = self._total_balance
-        elif self.balance_type == BALANCE_TYPE_PENDING:
-            balance = self._pending
-        else:
-            balance = self._available
+        pending = float(total.get("pending"))
+        available = float(total.get("available"))
+        total_balance = float(total.get("totalBalance"))
 
         if self.currency == CURRENCY_BTC:
-            return balance
+            self._pending = pending
+            self._available = available
+            self._total_balance = total_balance
         else:
             exchange_rates = self.coordinator.data.get("exchange_rates")
-            self._exchange_rate = exchange_rates.get(f"{CURRENCY_BTC}-{self.currency}")
-            return round(balance * self._exchange_rate, 2)
+            exchange_rate = exchange_rates.get(f"{CURRENCY_BTC}-{self.currency}")
+            self._pending = round(pending * exchange_rate, 2)
+            self._available = round(available * exchange_rate, 2)
+            self._total_balance = round(total_balance * exchange_rate, 2)
+            self._exchange_rate = exchange_rate
+
+        if self.balance_type == BALANCE_TYPE_TOTAL:
+            return self._total_balance
+        elif self.balance_type == BALANCE_TYPE_PENDING:
+            return self._pending
+
+        return self._available
 
     @property
     def icon(self):
