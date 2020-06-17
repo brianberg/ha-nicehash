@@ -22,6 +22,7 @@ from .const import (
     CONF_CURRENCY,
     CONF_ORGANIZATION_ID,
     CURRENCY_BTC,
+    CURRENCY_USD,
     DOMAIN,
     STARTUP_MESSAGE,
 )
@@ -39,7 +40,7 @@ CONFIG_SCHEMA = vol.Schema(
                 vol.Required(CONF_ORGANIZATION_ID): cv.string,
                 vol.Required(CONF_API_KEY): cv.string,
                 vol.Required(CONF_API_SECRET): cv.string,
-                vol.Required(CONF_CURRENCY, default=CURRENCY_BTC): cv.string,
+                vol.Required(CONF_CURRENCY, default=CURRENCY_USD): cv.string,
             }
         )
     },
@@ -57,7 +58,7 @@ async def async_setup(hass: HomeAssistant, config: Config):
     organization_id = nicehash_config.get(CONF_ORGANIZATION_ID)
     api_key = nicehash_config.get(CONF_API_KEY)
     api_secret = nicehash_config.get(CONF_API_SECRET)
-    currency = nicehash_config.get(CONF_CURRENCY)
+    currency = nicehash_config.get(CONF_CURRENCY).upper()
 
     client = NiceHashPrivateClient(organization_id, api_key, api_secret)
 
@@ -76,6 +77,7 @@ async def async_setup(hass: HomeAssistant, config: Config):
         _LOGGER.error("Unable to get NiceHash mining rigs")
         raise PlatformNotReady
 
+    hass.data[DOMAIN]["organization_id"] = organization_id
     hass.data[DOMAIN]["client"] = client
     hass.data[DOMAIN]["currency"] = currency
     hass.data[DOMAIN]["accounts_coordinator"] = accounts_coordinator
@@ -91,7 +93,7 @@ class NiceHashAccountsDataUpdateCoordinator(DataUpdateCoordinator):
 
     def __init__(self, hass: HomeAssistant, client: NiceHashPrivateClient):
         """Initialize"""
-        self.name = f"{DOMAIN}_Accounts_Coordinator"
+        self.name = f"{DOMAIN}_accounts_coordinator"
         self._client = client
 
         super().__init__(
@@ -106,9 +108,11 @@ class NiceHashAccountsDataUpdateCoordinator(DataUpdateCoordinator):
             rates_dict = dict()
             for rate in exchange_rates:
                 fromCurrency = rate.get("fromCurrency")
-                toCurrency = rate.get("toCurrency")
-                exchange_rate = float(rate.get("exchangeRate"))
-                rates_dict[f"{fromCurrency}-{toCurrency}"] = exchange_rate
+                # Only care about the Bitcoin exchange rates
+                if fromCurrency == CURRENCY_BTC:
+                    toCurrency = rate.get("toCurrency")
+                    exchange_rate = float(rate.get("exchangeRate"))
+                    rates_dict[f"{fromCurrency}-{toCurrency}"] = exchange_rate
             return {
                 "accounts": accounts,
                 "exchange_rates": rates_dict,
@@ -122,7 +126,7 @@ class NiceHashMiningRigsDataUpdateCoordinator(DataUpdateCoordinator):
 
     def __init__(self, hass: HomeAssistant, client: NiceHashPrivateClient):
         """Initialize"""
-        self.name = f"{DOMAIN}_Mining_Rigs_Coordinator"
+        self.name = f"{DOMAIN}_mining_rigs_coordinator"
         self._client = client
 
         super().__init__(

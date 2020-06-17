@@ -11,8 +11,9 @@ ISSUE_URL = "https://github.com/brianberg/ha-nicehash/issues"
 
 # Icons
 ICON = "mdi:pickaxe"
-ICON_CURRENCY_USD = "mdi:currency-usd"
 ICON_CURRENCY_BTC = "mdi:currency-btc"
+ICON_CURRENCY_EUR = "mdi:currency-eur"
+ICON_CURRENCY_USD = "mdi:currency-usd"
 ICON_TEMPERATURE = "mdi:thermometer"
 
 # Platforms
@@ -47,3 +48,6 @@ NICEHASH_API_URL = "https://api2.nicehash.com"
 CURRENCY_BTC = "BTC"
 CURRENCY_USD = "USD"
 CURRENCY_EUR = "EUR"
+BALANCE_TYPE_AVAILABLE = "available"
+BALANCE_TYPE_PENDING = "pending"
+BALANCE_TYPE_TOTAL = "total"

@@ -36,6 +36,7 @@ Platform | Description
       organization_id: <org_id>
       api_key: <api_key_code>
       api_secret: <api_secret_key_code>
+      currency: "EUR" (default = "USD")
     ```
 1. Restart Home Assistant
 

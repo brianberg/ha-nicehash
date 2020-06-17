@@ -12,12 +12,17 @@ from homeassistant.helpers.entity import Entity
 from homeassistant.util import Throttle
 
 from .const import (
+    BALANCE_TYPE_AVAILABLE,
+    BALANCE_TYPE_PENDING,
+    BALANCE_TYPE_TOTAL,
     CURRENCY_BTC,
     CURRENCY_EUR,
     CURRENCY_USD,
     DEFAULT_NAME,
     DOMAIN,
     ICON_CURRENCY_BTC,
+    ICON_CURRENCY_EUR,
+    ICON_CURRENCY_USD,
     ICON_TEMPERATURE,
 )
 from .nicehash import NiceHashPrivateClient, NiceHashPublicClient
@@ -36,27 +41,62 @@ async def async_setup_platform(
     _LOGGER.debug("Creating new NiceHash sensor components")
 
     data = hass.data[DOMAIN]
+    organization_id = data.get("organization_id")
     client = data.get("client")
     currency = data.get("currency")
     accounts_coordinator = data.get("accounts_coordinator")
     rigs_coordinator = data.get("rigs_coordinator")
 
-    # Add account balance sensor(s)
-    btc_balance_sensor = NiceHashBalanceSensor(
-        accounts_coordinator, client.organization_id, CURRENCY_BTC
-    )
-    if currency == CURRENCY_BTC:
-        async_add_entities([btc_balance_sensor], True)
-    else:
-        async_add_entities(
-            [
-                btc_balance_sensor,
-                NiceHashBalanceSensor(
-                    accounts_coordinator, client.organization_id, currency
-                ),
-            ],
-            True,
+    # Add account balance sensors
+    balance_sensors = [
+        NiceHashBalanceSensor(
+            accounts_coordinator,
+            organization_id,
+            currency=CURRENCY_BTC,
+            balance_type=BALANCE_TYPE_AVAILABLE,
+        ),
+        NiceHashBalanceSensor(
+            accounts_coordinator,
+            organization_id,
+            currency=CURRENCY_BTC,
+            balance_type=BALANCE_TYPE_PENDING,
+        ),
+        NiceHashBalanceSensor(
+            accounts_coordinator,
+            organization_id,
+            currency=CURRENCY_BTC,
+            balance_type=BALANCE_TYPE_TOTAL,
+        ),
+    ]
+    if currency == CURRENCY_USD or currency == CURRENCY_EUR:
+        balance_sensors.append(
+            NiceHashBalanceSensor(
+                accounts_coordinator,
+                organization_id,
+                currency=currency,
+                balance_type=BALANCE_TYPE_AVAILABLE,
+            )
         )
+        balance_sensors.append(
+            NiceHashBalanceSensor(
+                accounts_coordinator,
+                organization_id,
+                currency=currency,
+                balance_type=BALANCE_TYPE_PENDING,
+            )
+        )
+        balance_sensors.append(
+            NiceHashBalanceSensor(
+                accounts_coordinator,
+                organization_id,
+                currency=currency,
+                balance_type=BALANCE_TYPE_TOTAL,
+            )
+        )
+    else:
+        _LOGGER.warn("Invalid currency: must be EUR or USD")
+
+    async_add_entities(balance_sensors, True)
 
     # Add mining rig sensors
     rig_data = await client.get_mining_rigs()
@@ -71,12 +111,19 @@ async def async_setup_platform(
 class NiceHashBalanceSensor(Entity):
     """NiceHash Account Balance Sensor"""
 
-    def __init__(self, coordinator, organization_id, currency):
+    def __init__(
+        self,
+        coordinator,
+        organization_id,
+        currency,
+        balance_type=BALANCE_TYPE_AVAILABLE,
+    ):
         """Initialize the sensor"""
-        _LOGGER.debug(f"Account Balance Sensor: {currency}")
+        _LOGGER.debug(f"Account Balance Sensor: {balance_type} {currency}")
         self.coordinator = coordinator
         self.currency = currency
-        self._organization_id = organization_id
+        self.organization_id = organization_id
+        self.balance_type = balance_type
         self._available = 0.00
         self._pending = 0.00
         self._total_balance = 0.00
@@ -85,12 +132,13 @@ class NiceHashBalanceSensor(Entity):
     @property
     def name(self):
         """Sensor name"""
-        return f"{DEFAULT_NAME} Account Balance {self.currency}"
+        balance_type = self.balance_type[0].upper() + self.balance_type[1:]
+        return f"{DEFAULT_NAME} {balance_type} Account Balance {self.currency}"
 
     @property
     def unique_id(self):
         """Unique entity id"""
-        return f"{self._organization_id}:{self.currency}"
+        return f"{self.organization_id}:{self.currency}:{self.balance_type}"
 
     @property
     def should_poll(self):
@@ -110,16 +158,28 @@ class NiceHashBalanceSensor(Entity):
         self._pending = float(total.get("pending"))
         self._available = float(total.get("available"))
         self._total_balance = float(total.get("totalBalance"))
+
+        if self.balance_type == BALANCE_TYPE_TOTAL:
+            balance = self._total_balance
+        elif self.balance_type == BALANCE_TYPE_PENDING:
+            balance = self._pending
+        else:
+            balance = self._available
+
         if self.currency == CURRENCY_BTC:
-            return self._available
+            return balance
         else:
             exchange_rates = self.coordinator.data.get("exchange_rates")
             self._exchange_rate = exchange_rates.get(f"{CURRENCY_BTC}-{self.currency}")
-            return round(self._available * self._exchange_rate, 2)
+            return round(balance * self._exchange_rate, 2)
 
     @property
     def icon(self):
         """Sensor icon"""
+        if self.currency == CURRENCY_EUR:
+            return ICON_CURRENCY_EUR
+        elif self.currency == CURRENCY_USD:
+            return ICON_CURRENCY_USD
         return ICON_CURRENCY_BTC
 
     @property
@@ -202,7 +262,7 @@ class NiceHashRigTemperatureSensor(Entity):
                     self._temps.append(temp)
                     if temp > highest_temp:
                         highest_temp = temp
-                    return highest_temp
+                return highest_temp
             else:
                 _LOGGER.debug(f"{self._name}: No devices found")
                 self._num_devices = 0
