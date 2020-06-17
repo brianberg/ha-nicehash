@@ -7,6 +7,7 @@ import os
 
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import ATTR_ATTRIBUTION
 from homeassistant.core import Config, HomeAssistant
 from homeassistant.helpers.entity import Entity
 from homeassistant.util import Throttle
@@ -19,6 +20,7 @@ from .const import (
     CURRENCY_EUR,
     CURRENCY_USD,
     DEFAULT_NAME,
+    DEVICE_STATUS_INACTIVE,
     DOMAIN,
     ICON_CURRENCY_BTC,
     ICON_CURRENCY_EUR,
@@ -27,6 +29,7 @@ from .const import (
 )
 from .nicehash import NiceHashPrivateClient, NiceHashPublicClient
 
+ATTRIBUTION = "Data provided by NiceHash"
 FORMAT_DATETIME = "%d-%m-%Y %H:%M"
 SCAN_INTERVAL_RIGS = timedelta(minutes=1)
 SCAN_INTERVAL_ACCOUNTS = timedelta(minutes=60)
@@ -191,6 +194,7 @@ class NiceHashBalanceSensor(Entity):
     def device_state_attributes(self):
         """Sensor device state attributes"""
         return {
+            ATTR_ATTRIBUTION: ATTRIBUTION,
             "total": self._total_balance,
             "available": self._available,
             "pending": self._pending,
@@ -218,6 +222,7 @@ class NiceHashRigTemperatureSensor(Entity):
         self._name = rig["name"]
         self._temps = []
         self._num_devices = 0
+        self._num_active_devices = 0
         _LOGGER.debug(f"Mining Rig Temperature Sensor: {self._name} ({self._rig_id})")
 
     @property
@@ -248,20 +253,22 @@ class NiceHashRigTemperatureSensor(Entity):
             rig_data = mining_rigs.get(self._rig_id)
             devices = rig_data.get("devices")
             highest_temp = 0
-            num_devices = len(devices)
-            self._num_devices = num_devices
+            self._temps = []
+            self._num_devices = len(devices)
 
-            if num_devices > 0:
-                _LOGGER.debug(f"{self._name}: Found {num_devices} devices")
-                self._temps = []
+            if self._num_devices > 0:
+                _LOGGER.debug(f"{self._name}: Found {self._num_devices} devices")
                 for device in devices:
-                    temp = int(device.get("temperature"))
-                    if temp < 0:
-                        # Ignore inactive devices
+                    status = device.get("status").get("enumName")
+                    # Ignore inactive devices
+                    if status == DEVICE_STATUS_INACTIVE:
                         continue
+                    temp = int(device.get("temperature"))
                     self._temps.append(temp)
                     if temp > highest_temp:
                         highest_temp = temp
+
+                self._num_active_devices = len(self._temps)
                 return highest_temp
             else:
                 _LOGGER.debug(f"{self._name}: No devices found")
@@ -279,14 +286,17 @@ class NiceHashRigTemperatureSensor(Entity):
     @property
     def unit_of_measurement(self):
         """Sensor unit of measurement"""
+        # Not Celsius because then HA might convert to Fahrenheit
         return "C"
 
     @property
     def device_state_attributes(self):
         """Sensor device state attributes"""
         return {
+            ATTR_ATTRIBUTION: ATTRIBUTION,
             "temperatures": self._temps,
-            "num_devices": self._num_devices,
+            "active_devices": self._num_active_devices,
+            "total_devices": self._num_devices,
         }
 
     async def async_added_to_hass(self):
