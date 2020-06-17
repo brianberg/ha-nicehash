@@ -16,13 +16,7 @@ from .const import (
     CURRENCY_BTC,
     CURRENCY_EUR,
     CURRENCY_USD,
-    DEFAULT_NAME,
-    DEVICE_STATUS_INACTIVE,
     DOMAIN,
-    ICON_CURRENCY_BTC,
-    ICON_CURRENCY_EUR,
-    ICON_CURRENCY_USD,
-    ICON_TEMPERATURE,
 )
 from .nicehash import NiceHashPrivateClient, NiceHashPublicClient
 from .sensors import NiceHashBalanceSensor, NiceHashRigTemperatureSensor

@@ -142,7 +142,6 @@ class NiceHashRigTemperatureSensor(Entity):
         self._name = rig["name"]
         self._temps = []
         self._num_devices = 0
-        self._num_active_devices = 0
         _LOGGER.debug(f"Mining Rig Temperature Sensor: {self._name} ({self._rig_id})")
 
     @property
@@ -179,16 +178,10 @@ class NiceHashRigTemperatureSensor(Entity):
             if self._num_devices > 0:
                 _LOGGER.debug(f"{self._name}: Found {self._num_devices} devices")
                 for device in devices:
-                    status = device.get("status").get("enumName")
-                    # Ignore inactive devices
-                    if status == DEVICE_STATUS_INACTIVE:
-                        continue
                     temp = int(device.get("temperature"))
                     self._temps.append(temp)
                     if temp > highest_temp:
                         highest_temp = temp
-
-                self._num_active_devices = len(self._temps)
                 return highest_temp
             else:
                 _LOGGER.debug(f"{self._name}: No devices found")
@@ -215,7 +208,6 @@ class NiceHashRigTemperatureSensor(Entity):
         return {
             ATTR_ATTRIBUTION: ATTRIBUTION,
             "temperatures": self._temps,
-            "active_devices": self._num_active_devices,
             "total_devices": self._num_devices,
         }
 
