@@ -1,7 +1,9 @@
 """
 NiceHash API interface
 
-https://github.com/nicehash/rest-clients-demo/blob/master/python/nicehash.py
+References:
+ - https://docs.nicehash.com/main/index.html
+ - https://github.com/nicehash/rest-clients-demo/blob/master/python/nicehash.py
 """
 from datetime import datetime
 from hashlib import sha256
