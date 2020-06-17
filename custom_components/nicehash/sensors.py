@@ -1,6 +1,7 @@
 """
 NiceHash Mining Rig Temperature Sensor
 """
+from datetime import datetime
 import logging
 
 from homeassistant.const import ATTR_ATTRIBUTION
@@ -14,9 +15,11 @@ from .const import (
     CURRENCY_EUR,
     CURRENCY_USD,
     DEFAULT_NAME,
+    DEVICE_STATUS_UNKNOWN,
     ICON_CURRENCY_BTC,
     ICON_CURRENCY_EUR,
     ICON_CURRENCY_USD,
+    ICON_PULSE,
     ICON_TEMPERATURE,
 )
 
@@ -139,20 +142,22 @@ class NiceHashRigTemperatureSensor(Entity):
         """Initialize the sensor"""
         self.coordinator = coordinator
         self._rig_id = rig["rigId"]
-        self._name = rig["name"]
+        self._rig_name = rig["name"]
         self._temps = []
         self._num_devices = 0
-        _LOGGER.debug(f"Mining Rig Temperature Sensor: {self._name} ({self._rig_id})")
+        _LOGGER.debug(
+            f"Mining Rig Temperature Sensor: {self._rig_name} ({self._rig_id})"
+        )
 
     @property
     def name(self):
         """Sensor name"""
-        return self._name
+        return f"{self._rig_name} Temperature"
 
     @property
     def unique_id(self):
         """Unique entity id"""
-        return self._rig_id
+        return f"{self._rig_id}:temperature"
 
     @property
     def should_poll(self):
@@ -168,28 +173,25 @@ class NiceHashRigTemperatureSensor(Entity):
     def state(self):
         """Sensor state"""
         mining_rigs = self.coordinator.data.get("miningRigs")
+        self._highest_temp = 0
         try:
             rig_data = mining_rigs.get(self._rig_id)
             devices = rig_data.get("devices")
-            highest_temp = 0
             self._temps = []
             self._num_devices = len(devices)
 
             if self._num_devices > 0:
-                _LOGGER.debug(f"{self._name}: Found {self._num_devices} devices")
                 for device in devices:
                     temp = int(device.get("temperature"))
                     self._temps.append(temp)
-                    if temp > highest_temp:
-                        highest_temp = temp
-                return highest_temp
+                    if temp > self._highest_temp:
+                        self._highest_temp = temp
             else:
-                _LOGGER.debug(f"{self._name}: No devices found")
                 self._num_devices = 0
-                return 0
         except Exception as e:
-            _LOGGER.error(f"Unable to get mining rig {self._rig_id}\n{e}")
-            return 0
+            _LOGGER.error(f"Unable to get mining rig ({self._rig_id}) temperature\n{e}")
+
+        return self._highest_temp
 
     @property
     def icon(self):
@@ -207,7 +209,93 @@ class NiceHashRigTemperatureSensor(Entity):
         """Sensor device state attributes"""
         return {
             ATTR_ATTRIBUTION: ATTRIBUTION,
+            "highest_temperature": self._highest_temp,
             "temperatures": self._temps,
+            "total_devices": self._num_devices,
+        }
+
+    async def async_added_to_hass(self):
+        """Connect to dispatcher listening for entity data notifications"""
+        self.async_on_remove(
+            self.coordinator.async_add_listener(self.async_write_ha_state)
+        )
+
+    async def async_update(self):
+        """Update entity"""
+        await self.coordinator.async_request_refresh()
+
+
+class NiceHashRigStatusSensor(Entity):
+    """Displays status of a mining rig"""
+
+    def __init__(self, coordinator, rig):
+        """Initialize the sensor"""
+        self.coordinator = coordinator
+        self._rig_id = rig["rigId"]
+        self._rig_name = rig["name"]
+        self._status = DEVICE_STATUS_UNKNOWN
+        self._status_time = None
+        self._num_devices = 0
+        self._unit_of_measurement = "\u200b"
+        _LOGGER.debug(f"Mining Rig Status Sensor: {self._rig_name} ({self._rig_id})")
+
+    @property
+    def name(self):
+        """Sensor name"""
+        return f"{self._rig_name} Status"
+
+    @property
+    def unique_id(self):
+        """Unique entity id"""
+        return f"{self._rig_id}:status"
+
+    @property
+    def should_poll(self):
+        """No need to pool, Coordinator notifies entity of updates"""
+        return False
+
+    @property
+    def available(self):
+        """Whether sensor is available"""
+        return self.coordinator.last_update_success
+
+    @property
+    def state(self):
+        """Sensor state"""
+        mining_rigs = self.coordinator.data.get("miningRigs")
+        status = DEVICE_STATUS_UNKNOWN
+        try:
+            rig_data = mining_rigs.get(self._rig_id)
+            devices = rig_data.get("devices")
+            status = rig_data.get("minerStatus")
+            status_time_ms = int(rig_data.get("statusTime"))
+            self._num_devices = len(devices)
+            self._status_time = datetime.fromtimestamp(status_time_ms / 1000.0)
+        except Exception as e:
+            _LOGGER.error(f"Unable to get mining rig ({self._rig_id}) status\n{e}")
+            self._status_time = None
+            status = DEVICE_STATUS_UNKNOWN
+
+        self._status = status[0].upper() + status.lower()[1:]
+        return self._status
+
+    @property
+    def icon(self):
+        """Sensor icon"""
+        return ICON_PULSE
+
+    @property
+    def unit_of_measurement(self):
+        """Sensor unit of measurement"""
+        return self._unit_of_measurement
+
+    @property
+    def device_state_attributes(self):
+        """Sensor device state attributes"""
+        return {
+            ATTR_ATTRIBUTION: ATTRIBUTION,
+            "status": self._status,
+            "status_time": self._status_time.strftime(FORMAT_DATETIME),
             "total_devices": self._num_devices,
         }
 

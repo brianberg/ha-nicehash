@@ -19,7 +19,11 @@ from .const import (
     DOMAIN,
 )
 from .nicehash import NiceHashPrivateClient, NiceHashPublicClient
-from .sensors import NiceHashBalanceSensor, NiceHashRigTemperatureSensor
+from .sensors import (
+    NiceHashBalanceSensor,
+    NiceHashRigStatusSensor,
+    NiceHashRigTemperatureSensor,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -91,6 +95,10 @@ async def async_setup_platform(
     # Add mining rig sensors
     rig_data = await client.get_mining_rigs()
     mining_rigs = rig_data["miningRigs"]
+    # Add status sensors
+    async_add_entities(
+        [NiceHashRigStatusSensor(rigs_coordinator, rig) for rig in mining_rigs], True,
+    )
     # Add temperature sensors
     async_add_entities(
         [NiceHashRigTemperatureSensor(rigs_coordinator, rig) for rig in mining_rigs],
