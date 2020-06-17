@@ -14,9 +14,9 @@ _Component to integrate with [NiceHash][nicehash]_
 
 **This component will set up the following platforms.**
 
-Platform | Description
--- | --
-`sensor` | Show info from NiceHash API
+| Platform | Description                 |
+| -------- | --------------------------- |
+| `sensor` | Show info from NiceHash API |
 
 ## Installation
 
@@ -26,18 +26,18 @@ Platform | Description
 1. Download _all_ the files from the `custom_components/nicehash/` directory (folder) in this repository.
 1. Place the files you downloaded in the new directory (folder) you created.
 1. Generate [NiceHash][nicehash] API key
-    - Supported API Permissions
-      - Wallet Permissions > View balances...
-      - Mining Permissions > View mining data...
-    - See this [repository](https://github.com/nicehash/rest-clients-demo) for assistance
+   - Supported API Permissions
+     - Wallet Permissions > View balances...
+     - Mining Permissions > View mining data...
+   - See this [repository](https://github.com/nicehash/rest-clients-demo) for assistance
 1. Add `nicehash` to `configuration.yaml`
-    ```
-    nicehash:
-      organization_id: <org_id>
-      api_key: <api_key_code>
-      api_secret: <api_secret_key_code>
-      currency: "EUR" (default = "USD")
-    ```
+   ```
+   nicehash:
+     organization_id: <org_id>
+     api_key: <api_key_code>
+     api_secret: <api_secret_key_code>
+     currency: EUR (default = USD)
+   ```
 1. Restart Home Assistant
 
 Using your HA configuration directory (folder) as a starting point you should now also have this:
@@ -46,8 +46,10 @@ Using your HA configuration directory (folder) as a starting point you should no
 custom_components/nicehash/translations/en.json
 custom_components/nicehash/__init__.py
 custom_components/nicehash/const.py
+custom_components/nicehash/data_coordinators.py
 custom_components/nicehash/manifest.json
 custom_components/nicehash/sensor.py
+custom_components/nicehash/sensors.py
 ```
 
 <!---->
@@ -55,7 +57,6 @@ custom_components/nicehash/sensor.py
 ## Contributions are welcome!
 
 If you want to contribute to this please read the [Contribution guidelines](CONTRIBUTING.md)
-
 
 [nicehash]: https://nicehash.com
 [buymecoffee]: https://www.buymeacoffee.com/brianberg
@@ -72,4 +73,3 @@ If you want to contribute to this please read the [Contribution guidelines](CONT
 [maintenance-shield]: https://img.shields.io/badge/maintainer-Brian%20Berg%20%40brianberg-blue.svg?style=for-the-badge
 [releases-shield]: https://img.shields.io/github/v/release/brianberg/ha-nicehash?style=for-the-badge
 [releases]: https://github.com/brianberg/ha-nicehash/releases
-

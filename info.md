@@ -12,31 +12,32 @@ _Component to integrate with [NiceHash][nicehash]_
 
 **This component will set up the following platforms**
 
-Platform | Description
--- | --
-`sensor` | Show info from NiceHash API
+| Platform | Description                 |
+| -------- | --------------------------- |
+| `sensor` | Show info from NiceHash API |
 
 {% if not installed %}
+
 ## Installation
 
 <!-- 1. Click install
 1. In the HA UI go to "Configuration" -> "Integrations" click "+" and search for "NiceHash" -->
 
 1. Generate [NiceHash][nicehash] API key
-    - Supported API Permissions
-      - Wallet Permissions > View balances...
-      - Mining Permissions > View mining data...
-    - See this [repository](https://github.com/nicehash/rest-clients-demo) for assistance
+   - Supported API Permissions
+     - Wallet Permissions > View balances...
+     - Mining Permissions > View mining data...
+   - See this [repository](https://github.com/nicehash/rest-clients-demo) for assistance
 1. Add `nicehash` to `configuration.yaml`
-    ```
-    nicehash:
-      organization_id: <org_id>
-      api_key: <api_key_code>
-      api_secret: <api_secret_key_code>
-    ```
+   ```
+   nicehash:
+     organization_id: <org_id>
+     api_key: <api_key_code>
+     api_secret: <api_secret_key_code>
+     currency: EUR (default = USD)
+   ```
 
 {% endif %}
-
 
 <!-- ## Configuration is done in the UI -->
 
@@ -57,4 +58,3 @@ Platform | Description
 [maintenance-shield]: https://img.shields.io/badge/maintainer-Brian%20Berg%20%40brianberg-blue.svg?style=for-the-badge
 [releases-shield]: https://img.shields.io/github/v/release/brianberg/ha-nicehash?style=for-the-badge
 [releases]: https://github.com/brianberg/ha-nicehash/releases
-
