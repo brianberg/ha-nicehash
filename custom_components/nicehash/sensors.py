@@ -1,5 +1,5 @@
 """
-NiceHash Mining Rig Temperature Sensor
+NiceHash Sensors
 """
 from datetime import datetime
 import logging
@@ -29,8 +29,15 @@ FORMAT_DATETIME = "%d-%m-%Y %H:%M"
 _LOGGER = logging.getLogger(__name__)
 
 
+#######################################
+# Account Sensors
+#######################################
+
+
 class NiceHashBalanceSensor(Entity):
-    """NiceHash Account Balance Sensor"""
+    """
+    Displays [available|pending|total] balance of an account for a currency
+    """
 
     def __init__(
         self,
@@ -63,7 +70,7 @@ class NiceHashBalanceSensor(Entity):
 
     @property
     def should_poll(self):
-        """No need to pool, Coordinator notifies entity of updates"""
+        """No need to poll, Coordinator notifies entity of updates"""
         return False
 
     @property
@@ -135,8 +142,15 @@ class NiceHashBalanceSensor(Entity):
         await self.coordinator.async_request_refresh()
 
 
+#######################################
+# Mining Rig Sensors
+#######################################
+
+
 class NiceHashRigTemperatureSensor(Entity):
-    """Displays highest temperature of active mining rig devices"""
+    """
+    Displays highest temperature of active mining rig devices
+    """
 
     def __init__(self, coordinator, rig):
         """Initialize the sensor"""
@@ -161,7 +175,7 @@ class NiceHashRigTemperatureSensor(Entity):
 
     @property
     def should_poll(self):
-        """No need to pool, Coordinator notifies entity of updates"""
+        """No need to poll, Coordinator notifies entity of updates"""
         return False
 
     @property
@@ -226,7 +240,9 @@ class NiceHashRigTemperatureSensor(Entity):
 
 
 class NiceHashRigStatusSensor(Entity):
-    """Displays status of a mining rig"""
+    """
+    Displays status of a mining rig
+    """
 
     def __init__(self, coordinator, rig):
         """Initialize the sensor"""
@@ -251,7 +267,7 @@ class NiceHashRigStatusSensor(Entity):
 
     @property
     def should_poll(self):
-        """No need to pool, Coordinator notifies entity of updates"""
+        """No need to poll, Coordinator notifies entity of updates"""
         return False
 
     @property
