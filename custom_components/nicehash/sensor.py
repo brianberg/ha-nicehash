@@ -17,12 +17,23 @@ from .const import (
     CURRENCY_EUR,
     CURRENCY_USD,
     DOMAIN,
+    DEVICE_LOAD,
+    DEVICE_RPM,
+    DEVICE_SPEED_RATE,
+    DEVICE_SPEED_ALGORITHM,
 )
 from .nicehash import NiceHashPrivateClient, NiceHashPublicClient
 from .sensors import (
     NiceHashBalanceSensor,
     NiceHashRigStatusSensor,
     NiceHashRigTemperatureSensor,
+    NiceHashRigProfitabilitySensor,
+    NiceHashDeviceAlgorithmSensor,
+    NiceHashDeviceSpeedSensor,
+    NiceHashDeviceStatusSensor,
+    NiceHashDeviceLoadSensor,
+    NiceHashDeviceRPMSensor,
+    NiceHashDeviceTemperatureSensor,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -94,7 +105,8 @@ async def async_setup_platform(
 
     # Add mining rig sensors
     rig_data = await client.get_mining_rigs()
-    mining_rigs = rig_data["miningRigs"]
+    mining_rigs = rig_data.get("miningRigs")
+
     # Add status sensors
     async_add_entities(
         [NiceHashRigStatusSensor(rigs_coordinator, rig) for rig in mining_rigs], True,
@@ -104,3 +116,34 @@ async def async_setup_platform(
         [NiceHashRigTemperatureSensor(rigs_coordinator, rig) for rig in mining_rigs],
         True,
     )
+    # Add profitability sensors
+    async_add_entities(
+        [NiceHashRigProfitabilitySensor(rigs_coordinator, rig) for rig in mining_rigs],
+        True,
+    )
+    # Add device sensors
+    device_sensors = []
+    for rig in mining_rigs:
+        devices = rig.get("devices")
+        for i in range(len(devices)):
+            device = devices[i]
+            device_sensors.append(
+                NiceHashDeviceAlgorithmSensor(rigs_coordinator, rig, device)
+            )
+            device_sensors.append(
+                NiceHashDeviceSpeedSensor(rigs_coordinator, rig, device)
+            )
+            device_sensors.append(
+                NiceHashDeviceStatusSensor(rigs_coordinator, rig, device)
+            )
+            device_sensors.append(
+                NiceHashDeviceTemperatureSensor(rigs_coordinator, rig, device)
+            )
+            device_sensors.append(
+                NiceHashDeviceLoadSensor(rigs_coordinator, rig, device)
+            )
+            device_sensors.append(
+                NiceHashDeviceRPMSensor(rigs_coordinator, rig, device)
+            )
+
+    async_add_entities(device_sensors, True)

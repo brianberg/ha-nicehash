@@ -10,12 +10,14 @@ VERSION = "0.1.0"
 ISSUE_URL = "https://github.com/brianberg/ha-nicehash/issues"
 
 # Icons
-ICON = "mdi:pickaxe"
 ICON_CURRENCY_BTC = "mdi:currency-btc"
 ICON_CURRENCY_EUR = "mdi:currency-eur"
 ICON_CURRENCY_USD = "mdi:currency-usd"
+ICON_MEMORY = "mdi:memory"
+ICON_PICKAXE = "mdi:pickaxe"
 ICON_PULSE = "mdi:pulse"
-ICON_TEMPERATURE = "mdi:thermometer"
+ICON_THERMOMETER = "mdi:thermometer"
+ICON_SPEEDOMETER = "mdi:speedometer"
 
 # Platforms
 SENSOR = "sensor"
@@ -46,12 +48,15 @@ If you have any issues with this you need to open an issue here:
 
 # NiceHash
 NICEHASH_API_URL = "https://api2.nicehash.com"
+# Currency
 CURRENCY_BTC = "BTC"
 CURRENCY_USD = "USD"
 CURRENCY_EUR = "EUR"
+# Balance type
 BALANCE_TYPE_AVAILABLE = "available"
 BALANCE_TYPE_PENDING = "pending"
 BALANCE_TYPE_TOTAL = "total"
+# Device status
 DEVICE_STATUS_UNKNOWN = "UNKNOWN"
 DEVICE_STATUS_DISABLED = "DISABLED"
 DEVICE_STATUS_INACTIVE = "INACTIVE"
@@ -60,3 +65,8 @@ DEVICE_STATUS_BENCHMARKING = "BENCHMARKING"
 DEVICE_STATUS_ERROR = "ERROR"
 DEVICE_STATUS_PENDING = "PENDING"
 DEVICE_STATUS_OFFLINE = "OFFLINE"
+# Device stat
+DEVICE_SPEED_RATE = "device-speed-rate"
+DEVICE_SPEED_ALGORITHM = "device-speed-algorithm"
+DEVICE_LOAD = "device-load"
+DEVICE_RPM = "device-rpm"
