@@ -25,11 +25,12 @@ PLATFORMS = [SENSOR]
 
 
 # Configuration and options
-CONF_ENABLED = "enabled"
 CONF_API_KEY = "api_key"
 CONF_API_SECRET = "api_secret"
 CONF_ORGANIZATION_ID = "organization_id"
 CONF_CURRENCY = "currency"
+CONF_RIGS_ENABLED = "rigs"
+CONF_DEVICES_ENABLED = "devices"
 
 
 # Defaults

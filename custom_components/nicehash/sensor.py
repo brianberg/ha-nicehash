@@ -3,7 +3,6 @@ Sensor platform for NiceHash
 """
 import logging
 
-from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import ATTR_ATTRIBUTION
 from homeassistant.core import Config, HomeAssistant
@@ -46,28 +45,56 @@ async def async_setup_platform(
     _LOGGER.debug("Creating new NiceHash sensor components")
 
     data = hass.data[DOMAIN]
+    # Configuration
     organization_id = data.get("organization_id")
     client = data.get("client")
+    # Options
     currency = data.get("currency")
-    accounts_coordinator = data.get("accounts_coordinator")
-    rigs_coordinator = data.get("rigs_coordinator")
+    rigs_enabled = data.get("rigs_enabled")
+    devices_enabled = data.get("devices_enabled")
+
+    print(f"rigs: {rigs_enabled}")
+    print(f"devices: {devices_enabled}")
 
     # Add account balance sensors
+    accounts_coordinator = data.get("accounts_coordinator")
+    balance_sensors = create_balance_sensors(
+        organization_id, currency, accounts_coordinator
+    )
+    async_add_entities(balance_sensors, True)
+
+    if rigs_enabled or devices_enabled:
+        rigs_coordinator = data.get("rigs_coordinator")
+        rig_data = await client.get_mining_rigs()
+        mining_rigs = rig_data.get("miningRigs")
+
+        # Add mining rig sensors if enabled
+        if rigs_enabled:
+            rig_sensors = create_rig_sensors(mining_rigs, rigs_coordinator)
+            async_add_entities(rig_sensors, True)
+
+        # Add device sensors if enabled
+        if devices_enabled:
+            device_sensors = create_device_sensors(mining_rigs, rigs_coordinator)
+            async_add_entities(device_sensors, True)
+
+
+def create_balance_sensors(organization_id, currency, coordinator):
     balance_sensors = [
         NiceHashBalanceSensor(
-            accounts_coordinator,
+            coordinator,
             organization_id,
             currency=CURRENCY_BTC,
             balance_type=BALANCE_TYPE_AVAILABLE,
         ),
         NiceHashBalanceSensor(
-            accounts_coordinator,
+            coordinator,
             organization_id,
             currency=CURRENCY_BTC,
             balance_type=BALANCE_TYPE_PENDING,
         ),
         NiceHashBalanceSensor(
-            accounts_coordinator,
+            coordinator,
             organization_id,
             currency=CURRENCY_BTC,
             balance_type=BALANCE_TYPE_TOTAL,
@@ -76,7 +103,7 @@ async def async_setup_platform(
     if currency == CURRENCY_USD or currency == CURRENCY_EUR:
         balance_sensors.append(
             NiceHashBalanceSensor(
-                accounts_coordinator,
+                coordinator,
                 organization_id,
                 currency=currency,
                 balance_type=BALANCE_TYPE_AVAILABLE,
@@ -84,7 +111,7 @@ async def async_setup_platform(
         )
         balance_sensors.append(
             NiceHashBalanceSensor(
-                accounts_coordinator,
+                coordinator,
                 organization_id,
                 currency=currency,
                 balance_type=BALANCE_TYPE_PENDING,
@@ -92,7 +119,7 @@ async def async_setup_platform(
         )
         balance_sensors.append(
             NiceHashBalanceSensor(
-                accounts_coordinator,
+                coordinator,
                 organization_id,
                 currency=currency,
                 balance_type=BALANCE_TYPE_TOTAL,
@@ -101,49 +128,34 @@ async def async_setup_platform(
     else:
         _LOGGER.warn("Invalid currency: must be EUR or USD")
 
-    async_add_entities(balance_sensors, True)
+    return balance_sensors
 
-    # Add mining rig sensors
-    rig_data = await client.get_mining_rigs()
-    mining_rigs = rig_data.get("miningRigs")
 
-    # Add status sensors
-    async_add_entities(
-        [NiceHashRigStatusSensor(rigs_coordinator, rig) for rig in mining_rigs], True,
-    )
-    # Add temperature sensors
-    async_add_entities(
-        [NiceHashRigTemperatureSensor(rigs_coordinator, rig) for rig in mining_rigs],
-        True,
-    )
-    # Add profitability sensors
-    async_add_entities(
-        [NiceHashRigProfitabilitySensor(rigs_coordinator, rig) for rig in mining_rigs],
-        True,
-    )
-    # Add device sensors
+def create_rig_sensors(mining_rigs, coordinator):
+    rig_sensors = []
+    for rig in mining_rigs:
+        rig_sensors.append(NiceHashRigStatusSensor(coordinator, rig))
+        rig_sensors.append(NiceHashRigTemperatureSensor(coordinator, rig))
+        rig_sensors.append(NiceHashRigProfitabilitySensor(coordinator, rig))
+
+    return rig_sensors
+
+
+def create_device_sensors(mining_rigs, coordinator):
     device_sensors = []
     for rig in mining_rigs:
         devices = rig.get("devices")
         for i in range(len(devices)):
             device = devices[i]
             device_sensors.append(
-                NiceHashDeviceAlgorithmSensor(rigs_coordinator, rig, device)
+                NiceHashDeviceAlgorithmSensor(coordinator, rig, device)
             )
+            device_sensors.append(NiceHashDeviceSpeedSensor(coordinator, rig, device))
+            device_sensors.append(NiceHashDeviceStatusSensor(coordinator, rig, device))
             device_sensors.append(
-                NiceHashDeviceSpeedSensor(rigs_coordinator, rig, device)
+                NiceHashDeviceTemperatureSensor(coordinator, rig, device)
             )
-            device_sensors.append(
-                NiceHashDeviceStatusSensor(rigs_coordinator, rig, device)
-            )
-            device_sensors.append(
-                NiceHashDeviceTemperatureSensor(rigs_coordinator, rig, device)
-            )
-            device_sensors.append(
-                NiceHashDeviceLoadSensor(rigs_coordinator, rig, device)
-            )
-            device_sensors.append(
-                NiceHashDeviceRPMSensor(rigs_coordinator, rig, device)
-            )
+            device_sensors.append(NiceHashDeviceLoadSensor(coordinator, rig, device))
+            device_sensors.append(NiceHashDeviceRPMSensor(coordinator, rig, device))
 
-    async_add_entities(device_sensors, True)
+    return device_sensors
