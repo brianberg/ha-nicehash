@@ -42,18 +42,6 @@ _Component to integrate with [NiceHash][nicehash]_
    ```
 1. Restart Home Assistant
 
-Using your HA configuration directory (folder) as a starting point you should now also have this:
-
-```text
-custom_components/nicehash/translations/en.json
-custom_components/nicehash/__init__.py
-custom_components/nicehash/const.py
-custom_components/nicehash/data_coordinators.py
-custom_components/nicehash/manifest.json
-custom_components/nicehash/sensor.py
-custom_components/nicehash/sensors.py
-```
-
 <!---->
 
 ## Contributions are welcome!
