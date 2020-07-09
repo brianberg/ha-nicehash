@@ -20,7 +20,7 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 
-class NiceHashRigTemperatureSensor(Entity):
+class RigTemperatureSensor(Entity):
     """
     Displays highest temperature of active mining rig devices
     """
@@ -112,7 +112,7 @@ class NiceHashRigTemperatureSensor(Entity):
         await self.coordinator.async_request_refresh()
 
 
-class NiceHashRigStatusSensor(Entity):
+class RigStatusSensor(Entity):
     """
     Displays status of a mining rig
     """
@@ -199,7 +199,7 @@ class NiceHashRigStatusSensor(Entity):
         await self.coordinator.async_request_refresh()
 
 
-class NiceHashRigProfitabilitySensor(Entity):
+class RigProfitabilitySensor(Entity):
     """
     Displays profitability of a mining rig
     """

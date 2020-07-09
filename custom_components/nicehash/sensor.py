@@ -22,19 +22,19 @@ from .const import (
     DEVICE_SPEED_ALGORITHM,
 )
 from .nicehash import NiceHashPrivateClient, NiceHashPublicClient
-from .account_sensors import NiceHashBalanceSensor
+from .account_sensors import BalanceSensor
 from .rig_sensors import (
-    NiceHashRigStatusSensor,
-    NiceHashRigTemperatureSensor,
-    NiceHashRigProfitabilitySensor,
+    RigStatusSensor,
+    RigTemperatureSensor,
+    RigProfitabilitySensor,
 )
 from .device_sensors import (
-    NiceHashDeviceAlgorithmSensor,
-    NiceHashDeviceSpeedSensor,
-    NiceHashDeviceStatusSensor,
-    NiceHashDeviceLoadSensor,
-    NiceHashDeviceRPMSensor,
-    NiceHashDeviceTemperatureSensor,
+    DeviceAlgorithmSensor,
+    DeviceSpeedSensor,
+    DeviceStatusSensor,
+    DeviceLoadSensor,
+    DeviceRPMSensor,
+    DeviceTemperatureSensor,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -80,19 +80,19 @@ async def async_setup_platform(
 
 def create_balance_sensors(organization_id, currency, coordinator):
     balance_sensors = [
-        NiceHashBalanceSensor(
+        BalanceSensor(
             coordinator,
             organization_id,
             currency=CURRENCY_BTC,
             balance_type=BALANCE_TYPE_AVAILABLE,
         ),
-        NiceHashBalanceSensor(
+        BalanceSensor(
             coordinator,
             organization_id,
             currency=CURRENCY_BTC,
             balance_type=BALANCE_TYPE_PENDING,
         ),
-        NiceHashBalanceSensor(
+        BalanceSensor(
             coordinator,
             organization_id,
             currency=CURRENCY_BTC,
@@ -101,7 +101,7 @@ def create_balance_sensors(organization_id, currency, coordinator):
     ]
     if currency == CURRENCY_USD or currency == CURRENCY_EUR:
         balance_sensors.append(
-            NiceHashBalanceSensor(
+            BalanceSensor(
                 coordinator,
                 organization_id,
                 currency=currency,
@@ -109,7 +109,7 @@ def create_balance_sensors(organization_id, currency, coordinator):
             )
         )
         balance_sensors.append(
-            NiceHashBalanceSensor(
+            BalanceSensor(
                 coordinator,
                 organization_id,
                 currency=currency,
@@ -117,7 +117,7 @@ def create_balance_sensors(organization_id, currency, coordinator):
             )
         )
         balance_sensors.append(
-            NiceHashBalanceSensor(
+            BalanceSensor(
                 coordinator,
                 organization_id,
                 currency=currency,
@@ -133,9 +133,9 @@ def create_balance_sensors(organization_id, currency, coordinator):
 def create_rig_sensors(mining_rigs, coordinator):
     rig_sensors = []
     for rig in mining_rigs:
-        rig_sensors.append(NiceHashRigStatusSensor(coordinator, rig))
-        rig_sensors.append(NiceHashRigTemperatureSensor(coordinator, rig))
-        rig_sensors.append(NiceHashRigProfitabilitySensor(coordinator, rig))
+        rig_sensors.append(RigStatusSensor(coordinator, rig))
+        rig_sensors.append(RigTemperatureSensor(coordinator, rig))
+        rig_sensors.append(RigProfitabilitySensor(coordinator, rig))
 
     return rig_sensors
 
@@ -146,15 +146,11 @@ def create_device_sensors(mining_rigs, coordinator):
         devices = rig.get("devices")
         for i in range(len(devices)):
             device = devices[i]
-            device_sensors.append(
-                NiceHashDeviceAlgorithmSensor(coordinator, rig, device)
-            )
-            device_sensors.append(NiceHashDeviceSpeedSensor(coordinator, rig, device))
-            device_sensors.append(NiceHashDeviceStatusSensor(coordinator, rig, device))
-            device_sensors.append(
-                NiceHashDeviceTemperatureSensor(coordinator, rig, device)
-            )
-            device_sensors.append(NiceHashDeviceLoadSensor(coordinator, rig, device))
-            device_sensors.append(NiceHashDeviceRPMSensor(coordinator, rig, device))
+            device_sensors.append(DeviceAlgorithmSensor(coordinator, rig, device))
+            device_sensors.append(DeviceSpeedSensor(coordinator, rig, device))
+            device_sensors.append(DeviceStatusSensor(coordinator, rig, device))
+            device_sensors.append(DeviceTemperatureSensor(coordinator, rig, device))
+            device_sensors.append(DeviceLoadSensor(coordinator, rig, device))
+            device_sensors.append(DeviceRPMSensor(coordinator, rig, device))
 
     return device_sensors

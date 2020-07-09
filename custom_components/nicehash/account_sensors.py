@@ -23,7 +23,7 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 
-class NiceHashBalanceSensor(Entity):
+class BalanceSensor(Entity):
     """
     Displays [available|pending|total] balance of an account for a currency
     """

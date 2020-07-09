@@ -23,7 +23,7 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 
-class NiceHashDeviceSensor(Entity):
+class DeviceSensor(Entity):
     """
     Mining rig device sensor
     """
@@ -129,7 +129,7 @@ class NiceHashDeviceSensor(Entity):
             self._algorithm = None
 
 
-class NiceHashDeviceStatusSensor(NiceHashDeviceSensor):
+class DeviceStatusSensor(DeviceSensor):
     """
     Displays status of a mining rig device
     """
@@ -155,7 +155,7 @@ class NiceHashDeviceStatusSensor(NiceHashDeviceSensor):
         return ICON_PULSE
 
 
-class NiceHashDeviceSpeedSensor(NiceHashDeviceSensor):
+class DeviceSpeedSensor(DeviceSensor):
     """
     Displays speed of a mining rig device
     """
@@ -186,7 +186,7 @@ class NiceHashDeviceSpeedSensor(NiceHashDeviceSensor):
         return f"{self._speed_unit}/s"
 
 
-class NiceHashDeviceAlgorithmSensor(NiceHashDeviceSensor):
+class DeviceAlgorithmSensor(DeviceSensor):
     """
     Displays algorithm of a mining rig device
     """
@@ -212,7 +212,7 @@ class NiceHashDeviceAlgorithmSensor(NiceHashDeviceSensor):
         return ICON_PICKAXE
 
 
-class NiceHashDeviceTemperatureSensor(NiceHashDeviceSensor):
+class DeviceTemperatureSensor(DeviceSensor):
     """
     Displays temperature of a mining rig device
     """
@@ -244,7 +244,7 @@ class NiceHashDeviceTemperatureSensor(NiceHashDeviceSensor):
         return "C"
 
 
-class NiceHashDeviceLoadSensor(NiceHashDeviceSensor):
+class DeviceLoadSensor(DeviceSensor):
     """
     Displays load of a mining rig device
     """
@@ -275,7 +275,7 @@ class NiceHashDeviceLoadSensor(NiceHashDeviceSensor):
         return "%"
 
 
-class NiceHashDeviceRPMSensor(NiceHashDeviceSensor):
+class DeviceRPMSensor(DeviceSensor):
     """
     Displays RPM of a mining rig device
     """
