@@ -22,11 +22,13 @@ from .const import (
     DEVICE_SPEED_ALGORITHM,
 )
 from .nicehash import NiceHashPrivateClient, NiceHashPublicClient
-from .sensors import (
-    NiceHashBalanceSensor,
+from .account_sensors import NiceHashBalanceSensor
+from .rig_sensors import (
     NiceHashRigStatusSensor,
     NiceHashRigTemperatureSensor,
     NiceHashRigProfitabilitySensor,
+)
+from .device_sensors import (
     NiceHashDeviceAlgorithmSensor,
     NiceHashDeviceSpeedSensor,
     NiceHashDeviceStatusSensor,
@@ -52,9 +54,6 @@ async def async_setup_platform(
     currency = data.get("currency")
     rigs_enabled = data.get("rigs_enabled")
     devices_enabled = data.get("devices_enabled")
-
-    print(f"rigs: {rigs_enabled}")
-    print(f"devices: {devices_enabled}")
 
     # Add account balance sensors
     accounts_coordinator = data.get("accounts_coordinator")

@@ -35,6 +35,7 @@ CONF_DEVICES_ENABLED = "devices"
 
 # Defaults
 DEFAULT_NAME = NAME
+FORMAT_DATETIME = "%d-%m-%Y %H:%M"
 
 # Startup
 STARTUP_MESSAGE = f"""
@@ -49,6 +50,7 @@ If you have any issues with this you need to open an issue here:
 
 # NiceHash
 NICEHASH_API_URL = "https://api2.nicehash.com"
+NICEHASH_ATTRIBUTION = "Data provided by NiceHash"
 # Currency
 CURRENCY_BTC = "BTC"
 CURRENCY_USD = "USD"
