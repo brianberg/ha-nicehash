@@ -37,6 +37,8 @@ _Component to integrate with [NiceHash][nicehash]_
      api_key: <api_key_code>
      api_secret: <api_secret_key_code>
      currency: EUR (default = USD)
+     rigs: true (default = false) - Enable rig sensors
+     devices: true (default = false) - Enable device sensors
    ```
 1. Restart Home Assistant
 
