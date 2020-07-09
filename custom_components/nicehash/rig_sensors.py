@@ -16,6 +16,7 @@ from .const import (
     ICON_THERMOMETER,
     NICEHASH_ATTRIBUTION,
 )
+from .nicehash import MiningRig
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -62,19 +63,11 @@ class RigTemperatureSensor(Entity):
         mining_rigs = self.coordinator.data.get("miningRigs")
         self._highest_temp = 0
         try:
-            rig_data = mining_rigs.get(self._rig_id)
-            devices = rig_data.get("devices")
-            self._temps = []
-            self._num_devices = len(devices)
-
-            if self._num_devices > 0:
-                for device in devices:
-                    temp = int(device.get("temperature"))
-                    self._temps.append(temp)
-                    if temp > self._highest_temp:
-                        self._highest_temp = temp
-            else:
-                self._num_devices = 0
+            rig = MiningRig(mining_rigs.get(self._rig_id))
+            if rig:
+                self._temps = rig.temperatures
+                self._num_devices = rig.num_devices
+                self._highest_temp = max(rig.temperatures)
         except Exception as e:
             _LOGGER.error(f"Unable to get mining rig ({self._rig_id}) temperature\n{e}")
 
@@ -154,12 +147,11 @@ class RigStatusSensor(Entity):
         mining_rigs = self.coordinator.data.get("miningRigs")
         status = DEVICE_STATUS_UNKNOWN
         try:
-            rig_data = mining_rigs.get(self._rig_id)
-            devices = rig_data.get("devices")
-            status = rig_data.get("minerStatus")
-            status_time_ms = int(rig_data.get("statusTime"))
-            self._num_devices = len(devices)
-            self._status_time = datetime.fromtimestamp(status_time_ms / 1000.0)
+            rig = MiningRig(mining_rigs.get(self._rig_id))
+            if rig:
+                status = rig.status
+                self._num_devices = rig.num_devices
+                self._status_time = datetime.fromtimestamp(rig.status_time / 1000.0)
         except Exception as e:
             _LOGGER.error(f"Unable to get mining rig ({self._rig_id}) status\n{e}")
             self._status_time = None
@@ -181,10 +173,14 @@ class RigStatusSensor(Entity):
     @property
     def device_state_attributes(self):
         """Sensor device state attributes"""
+        status_time = None
+        if self._status_time:
+            status_time = self._status_time.strftime(FORMAT_DATETIME)
+
         return {
             ATTR_ATTRIBUTION: NICEHASH_ATTRIBUTION,
             "status": self._status,
-            "status_time": self._status_time.strftime(FORMAT_DATETIME),
+            "status_time": status_time,
             "total_devices": self._num_devices,
         }
 
@@ -240,9 +236,10 @@ class RigProfitabilitySensor(Entity):
         """Sensor state"""
         mining_rigs = self.coordinator.data.get("miningRigs")
         try:
-            rig_data = mining_rigs.get(self._rig_id)
-            self._profitability = rig_data.get("profitability")
-            self._unpaid_amount = rig_data.get("unpaidAmount")
+            rig = MiningRig(mining_rigs.get(self._rig_id))
+            if rig:
+                self._profitability = rig.profitability
+                self._unpaid_amount = rig.unpaid_amount
         except Exception as e:
             _LOGGER.error(f"Unable to get mining rig ({self._rig_id}) status\n{e}")
             self._profitability = 0

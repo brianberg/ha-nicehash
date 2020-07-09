@@ -17,6 +17,35 @@ import uuid
 from .const import NICEHASH_API_URL
 
 
+class MiningRigDevice:
+    def __init__(self, data):
+        self.device_id = data.get("id")
+        self.name = data.get("name")
+        self.status = data.get("status").get("description")
+        self.temperature = int(data.get("temperature"))
+        self.load = float(data.get("load"))
+        self.rpm = float(data.get("revolutionsPerMinute"))
+        self.speeds = data.get("speeds")
+
+
+class MiningRig:
+    def __init__(self, data):
+        self.rig_id = data.get("rig_id")
+        self.name = data.get("name")
+        self.status = data.get("minerStatus")
+        self.status_time = data.get("statusTime")
+        self.devices = dict()
+        self.temperatures = []
+        self.profitability = data.get("profitability")
+        self.unpaid_amount = data.get("unpaidAmount")
+        devices = data.get("devices")
+        self.num_devices = len(devices)
+        for raw_device in devices:
+            device = MiningRigDevice(raw_device)
+            self.devices[f"{device.device_id}"] = device
+            self.temperatures.append(device.temperature)
+
+
 class NiceHashPublicClient:
     async def get_exchange_rates(self):
         exchange_data = await self.request("GET", "/main/api/v2/exchangeRate/list")

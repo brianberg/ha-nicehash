@@ -19,6 +19,7 @@ from .const import (
     ICON_SPEEDOMETER,
     NICEHASH_ATTRIBUTION,
 )
+from .nicehash import MiningRig, MiningRigDevice
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -94,32 +95,27 @@ class DeviceSensor(Entity):
         await self.coordinator.async_request_refresh()
         mining_rigs = self.coordinator.data.get("miningRigs")
         try:
-            rig_data = mining_rigs.get(self._rig_id)
-            devices = rig_data.get("devices")
-            for device in devices:
-                if device.get("id") == self._device_id:
-                    algorithms = device.get("speeds")
+            rig = MiningRig(mining_rigs.get(self._rig_id))
+            if rig:
+                device = rig.devices.get(self._device_id)
+                if device:
+                    self._status = device.status
+                    self._load = device.load
+                    self._rpm = device.rpm
+                    self._temperature = device.temperature
+                    algorithms = device.speeds
                     if len(algorithms) > 0:
-                        status = device.get("status")
-                        self._status = status.get("description")
                         algorithm = algorithms[0]
-                        self._load = float(device.get("load"))
-                        self._rpm = float(device.get("revolutionsPerMinute"))
                         self._algorithm = algorithm.get("title")
                         self._speed = float(algorithm.get("speed"))
                         self._speed_title = algorithm.get("title")
                         self._speed_unit = algorithm.get("displaySuffix")
-                        self._temperature = int(device.get("temperature"))
                     else:
-                        self._status = DEVICE_STATUS_UNKNOWN
-                        self._load = 0
-                        self._rpm = 0
-                        self._speed = 0
                         self._speed_title = "Unknown"
                         self._speed_unit = "MH"
                         self._algorithm = None
         except Exception as e:
-            _LOGGER.error(f"Unable to get mining device ({self._device_id}) speed\n{e}")
+            _LOGGER.error(f"Unable to get mining device ({self._device_id})\n{e}")
             self._status = DEVICE_STATUS_UNKNOWN
             self._load = 0
             self._rpm = 0

@@ -144,8 +144,7 @@ def create_device_sensors(mining_rigs, coordinator):
     device_sensors = []
     for rig in mining_rigs:
         devices = rig.get("devices")
-        for i in range(len(devices)):
-            device = devices[i]
+        for device in devices:
             device_sensors.append(DeviceAlgorithmSensor(coordinator, rig, device))
             device_sensors.append(DeviceSpeedSensor(coordinator, rig, device))
             device_sensors.append(DeviceStatusSensor(coordinator, rig, device))
