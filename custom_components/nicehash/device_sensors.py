@@ -19,6 +19,7 @@ from .const import (
     ICON_SPEEDOMETER,
     NICEHASH_ATTRIBUTION,
 )
+from .data_coordinators import MiningRigsDataUpdateCoordinator
 from .nicehash import MiningRig, MiningRigDevice
 
 _LOGGER = logging.getLogger(__name__)
@@ -29,13 +30,18 @@ class DeviceSensor(Entity):
     Mining rig device sensor
     """
 
-    def __init__(self, coordinator, rig, device):
+    def __init__(
+        self,
+        coordinator: MiningRigsDataUpdateCoordinator,
+        rig_data: dict,
+        device_data: dict,
+    ):
         """Initialize the sensor"""
         self.coordinator = coordinator
-        self._rig_id = rig.get("rigId")
-        self._rig_name = rig.get("name")
-        self._device_name = device.get("name")
-        self._device_id = device.get("id")
+        self._rig_id = rig_data.get("rigId")
+        self._rig_name = rig_data.get("name")
+        self._device_name = device_data.get("name")
+        self._device_id = device_data.get("id")
         self._status = DEVICE_STATUS_UNKNOWN
         self._load = 0
         self._rpm = 0

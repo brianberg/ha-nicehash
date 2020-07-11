@@ -16,6 +16,7 @@ from .const import (
     ICON_THERMOMETER,
     NICEHASH_ATTRIBUTION,
 )
+from .data_coordinators import MiningRigsDataUpdateCoordinator
 from .nicehash import MiningRig
 
 _LOGGER = logging.getLogger(__name__)
@@ -26,11 +27,11 @@ class RigTemperatureSensor(Entity):
     Displays highest temperature of active mining rig devices
     """
 
-    def __init__(self, coordinator, rig):
+    def __init__(self, coordinator: MiningRigsDataUpdateCoordinator, rig_data: dict):
         """Initialize the sensor"""
         self.coordinator = coordinator
-        self._rig_id = rig["rigId"]
-        self._rig_name = rig["name"]
+        self._rig_id = rig_data["rigId"]
+        self._rig_name = rig_data["name"]
         self._temps = []
         self._num_devices = 0
         _LOGGER.debug(
@@ -110,15 +111,13 @@ class RigStatusSensor(Entity):
     Displays status of a mining rig
     """
 
-    def __init__(self, coordinator, rig):
+    def __init__(self, coordinator: MiningRigsDataUpdateCoordinator, rig_data: dict):
         """Initialize the sensor"""
         self.coordinator = coordinator
-        self._rig_id = rig["rigId"]
-        self._rig_name = rig["name"]
+        self._rig_id = rig_data["rigId"]
+        self._rig_name = rig_data["name"]
         self._status = DEVICE_STATUS_UNKNOWN
         self._status_time = None
-        self._num_devices = 0
-        self._unit_of_measurement = "\u200b"
         _LOGGER.debug(f"Mining Rig Status Sensor: {self._rig_name} ({self._rig_id})")
 
     @property
@@ -150,7 +149,6 @@ class RigStatusSensor(Entity):
             rig = MiningRig(mining_rigs.get(self._rig_id))
             if rig:
                 status = rig.status
-                self._num_devices = rig.num_devices
                 self._status_time = datetime.fromtimestamp(rig.status_time / 1000.0)
         except Exception as e:
             _LOGGER.error(f"Unable to get mining rig ({self._rig_id}) status\n{e}")
@@ -168,7 +166,7 @@ class RigStatusSensor(Entity):
     @property
     def unit_of_measurement(self):
         """Sensor unit of measurement"""
-        return self._unit_of_measurement
+        return "\u200b"
 
     @property
     def device_state_attributes(self):
@@ -181,7 +179,6 @@ class RigStatusSensor(Entity):
             ATTR_ATTRIBUTION: NICEHASH_ATTRIBUTION,
             "status": self._status,
             "status_time": status_time,
-            "total_devices": self._num_devices,
         }
 
     async def async_added_to_hass(self):
@@ -200,11 +197,11 @@ class RigProfitabilitySensor(Entity):
     Displays profitability of a mining rig
     """
 
-    def __init__(self, coordinator, rig):
+    def __init__(self, coordinator: MiningRigsDataUpdateCoordinator, rig_data: dict):
         """Initialize the sensor"""
         self.coordinator = coordinator
-        self._rig_id = rig["rigId"]
-        self._rig_name = rig["name"]
+        self._rig_id = rig_data["rigId"]
+        self._rig_name = rig_data["name"]
         self._profitability = 0
         self._unpaid_amount = 0
         _LOGGER.debug(

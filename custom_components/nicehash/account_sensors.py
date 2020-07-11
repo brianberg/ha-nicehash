@@ -19,6 +19,7 @@ from .const import (
     ICON_CURRENCY_USD,
     NICEHASH_ATTRIBUTION,
 )
+from .data_coordinators import AccountsDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -30,9 +31,9 @@ class BalanceSensor(Entity):
 
     def __init__(
         self,
-        coordinator,
-        organization_id,
-        currency,
+        coordinator: AccountsDataUpdateCoordinator,
+        organization_id: str,
+        currency: str,
         balance_type=BALANCE_TYPE_AVAILABLE,
     ):
         """Initialize the sensor"""
