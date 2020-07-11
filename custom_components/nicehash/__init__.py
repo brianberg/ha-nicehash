@@ -20,6 +20,7 @@ from .const import (
     CONF_ORGANIZATION_ID,
     CONF_RIGS_ENABLED,
     CONF_DEVICES_ENABLED,
+    CONF_PAYOUTS_ENABLED,
     CURRENCY_USD,
     DOMAIN,
     STARTUP_MESSAGE,
@@ -27,6 +28,7 @@ from .const import (
 from .nicehash import NiceHashPrivateClient
 from .data_coordinators import (
     AccountsDataUpdateCoordinator,
+    MiningPayoutsDataUpdateCoordinator,
     MiningRigsDataUpdateCoordinator,
 )
 
@@ -42,6 +44,7 @@ CONFIG_SCHEMA = vol.Schema(
                 vol.Required(CONF_CURRENCY, default=CURRENCY_USD): cv.string,
                 vol.Required(CONF_RIGS_ENABLED, default=False): cv.boolean,
                 vol.Required(CONF_DEVICES_ENABLED, default=False): cv.boolean,
+                vol.Required(CONF_PAYOUTS_ENABLED, default=False): cv.boolean,
             }
         )
     },
@@ -64,22 +67,39 @@ async def async_setup(hass: HomeAssistant, config: Config):
     currency = nicehash_config.get(CONF_CURRENCY).upper()
     rigs_enabled = nicehash_config.get(CONF_RIGS_ENABLED)
     devices_enabled = nicehash_config.get(CONF_DEVICES_ENABLED)
+    payouts_enabled = nicehash_config.get(CONF_PAYOUTS_ENABLED)
 
     client = NiceHashPrivateClient(organization_id, api_key, api_secret)
 
-    accounts_coordinator = AccountsDataUpdateCoordinator(hass, client)
+    hass.data[DOMAIN]["organization_id"] = organization_id
+    hass.data[DOMAIN]["client"] = client
+    hass.data[DOMAIN]["currency"] = currency
+    hass.data[DOMAIN]["rigs_enabled"] = rigs_enabled
+    hass.data[DOMAIN]["devices_enabled"] = devices_enabled
+    hass.data[DOMAIN]["payouts_enabled"] = payouts_enabled
 
+    # Accounts
+    accounts_coordinator = AccountsDataUpdateCoordinator(hass, client)
     await accounts_coordinator.async_refresh()
 
     if not accounts_coordinator.last_update_success:
         _LOGGER.error("Unable to get NiceHash accounts")
         raise PlatformNotReady
 
-    hass.data[DOMAIN]["organization_id"] = organization_id
-    hass.data[DOMAIN]["client"] = client
-    hass.data[DOMAIN]["currency"] = currency
     hass.data[DOMAIN]["accounts_coordinator"] = accounts_coordinator
 
+    # Payouts
+    if payouts_enabled:
+        payouts_coordinator = MiningPayoutsDataUpdateCoordinator(hass, client)
+        await payouts_coordinator.async_refresh()
+
+        if not payouts_coordinator.last_update_success:
+            _LOGGER.error("Unable to get NiceHash mining payouts")
+            raise PlatformNotReady
+
+        hass.data[DOMAIN]["payouts_coordinator"] = payouts_coordinator
+
+    # Rigs
     if rigs_enabled or devices_enabled:
         rigs_coordinator = MiningRigsDataUpdateCoordinator(hass, client)
         await rigs_coordinator.async_refresh()
@@ -88,8 +108,6 @@ async def async_setup(hass: HomeAssistant, config: Config):
             _LOGGER.error("Unable to get NiceHash mining rigs")
             raise PlatformNotReady
 
-        hass.data[DOMAIN]["rigs_enabled"] = rigs_enabled
-        hass.data[DOMAIN]["devices_enabled"] = devices_enabled
         hass.data[DOMAIN]["rigs_coordinator"] = rigs_coordinator
 
     await discovery.async_load_platform(hass, "sensor", DOMAIN, {}, config)

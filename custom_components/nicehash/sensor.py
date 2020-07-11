@@ -23,6 +23,7 @@ from .const import (
 )
 from .nicehash import NiceHashPrivateClient, NiceHashPublicClient
 from .account_sensors import BalanceSensor
+from .payout_sensors import RecentMiningPayoutSensor
 from .rig_sensors import (
     RigStatusSensor,
     RigTemperatureSensor,
@@ -52,6 +53,7 @@ async def async_setup_platform(
     client = data.get("client")
     # Options
     currency = data.get("currency")
+    payouts_enabled = data.get("payouts_enabled")
     rigs_enabled = data.get("rigs_enabled")
     devices_enabled = data.get("devices_enabled")
 
@@ -62,17 +64,22 @@ async def async_setup_platform(
     )
     async_add_entities(balance_sensors, True)
 
+    # Payout sensors
+    if payouts_enabled:
+        payouts_coordinator = data.get("payouts_coordinator")
+        payout_sensors = create_payout_sensors(organization_id, payouts_coordinator)
+        async_add_entities(payout_sensors)
+
+    # Mining rig and device sensors
     if rigs_enabled or devices_enabled:
         rigs_coordinator = data.get("rigs_coordinator")
         rig_data = await client.get_mining_rigs()
         mining_rigs = rig_data.get("miningRigs")
 
-        # Add mining rig sensors if enabled
         if rigs_enabled:
             rig_sensors = create_rig_sensors(mining_rigs, rigs_coordinator)
             async_add_entities(rig_sensors, True)
 
-        # Add device sensors if enabled
         if devices_enabled:
             device_sensors = create_device_sensors(mining_rigs, rigs_coordinator)
             async_add_entities(device_sensors, True)
@@ -128,6 +135,13 @@ def create_balance_sensors(organization_id, currency, coordinator):
         _LOGGER.warn("Invalid currency: must be EUR or USD")
 
     return balance_sensors
+
+
+def create_payout_sensors(organization_id, coordinator):
+    payout_sensors = []
+    payout_sensors.append(RecentMiningPayoutSensor(coordinator, organization_id))
+
+    return payout_sensors
 
 
 def create_rig_sensors(mining_rigs, coordinator):

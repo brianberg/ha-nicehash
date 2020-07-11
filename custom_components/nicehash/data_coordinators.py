@@ -18,6 +18,7 @@ from .nicehash import NiceHashPrivateClient, NiceHashPublicClient
 
 SCAN_INTERVAL_RIGS = timedelta(minutes=1)
 SCAN_INTERVAL_ACCOUNTS = timedelta(minutes=60)
+SCAN_INTERVAL_PAYOUTS = timedelta(minutes=60)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -78,5 +79,28 @@ class MiningRigsDataUpdateCoordinator(DataUpdateCoordinator):
                 rigs_dict[f"{rig_id}"] = rig
             data["miningRigs"] = rigs_dict
             return data
+        except Exception as e:
+            raise UpdateFailed(e)
+
+
+class MiningPayoutsDataUpdateCoordinator(DataUpdateCoordinator):
+    """Manages fetching mining rig payout data from NiceHash API"""
+
+    def __init__(self, hass: HomeAssistant, client: NiceHashPrivateClient):
+        """Initialize"""
+        self.name = f"{DOMAIN}_mining_payouts_coordinator"
+        self._client = client
+
+        super().__init__(
+            hass, _LOGGER, name=self.name, update_interval=SCAN_INTERVAL_PAYOUTS
+        )
+
+    async def _async_update_data(self):
+        """Update mining payouts data"""
+        try:
+            data = await self._client.get_rig_payouts(42)  # 6 (per day) * 7 days
+            payouts = data.get("list")
+            payouts.sort(key=lambda payout: payout.get("created"))
+            return payouts
         except Exception as e:
             raise UpdateFailed(e)

@@ -18,7 +18,7 @@ from .const import NICEHASH_API_URL
 
 
 class MiningRigDevice:
-    def __init__(self, data):
+    def __init__(self, data: dict):
         self.device_id = data.get("id")
         self.name = data.get("name")
         self.status = data.get("status").get("description")
@@ -29,7 +29,7 @@ class MiningRigDevice:
 
 
 class MiningRig:
-    def __init__(self, data):
+    def __init__(self, data: dict):
         self.rig_id = data.get("rig_id")
         self.name = data.get("name")
         self.status = data.get("minerStatus")
@@ -44,6 +44,24 @@ class MiningRig:
             device = MiningRigDevice(raw_device)
             self.devices[f"{device.device_id}"] = device
             self.temperatures.append(device.temperature)
+
+
+class Payout:
+    def __init__(self, data: dict):
+        self.id = data.get("id")
+        self.currency = "Unknown"
+        self.created = data.get("created")
+        self.amount = data.get("amount")
+        self.fee = data.get("feeAmount")
+        self.account_type = "Unknown"
+        # Currency
+        currency = data.get("currency")
+        if currency:
+            self.currency = currency.get("enumName")
+        # Account Type
+        account_type = data.get("accountType")
+        if account_type:
+            self.account_type = account_type.get("enumName")
 
 
 class NiceHashPublicClient:
@@ -88,6 +106,10 @@ class NiceHashPrivateClient:
 
     async def get_mining_rig(self, rig_id):
         return await self.request("GET", f"/main/api/v2/mining/rig2/{rig_id}")
+
+    async def get_rig_payouts(self, size=84):
+        query = f"size={size}"
+        return await self.request("GET", "/main/api/v2/mining/rigs/payouts", query)
 
     async def request(self, method, path, query="", body=None):
         xtime = self.get_epoch_ms_from_now()

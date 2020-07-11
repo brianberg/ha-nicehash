@@ -31,7 +31,7 @@ CONF_ORGANIZATION_ID = "organization_id"
 CONF_CURRENCY = "currency"
 CONF_RIGS_ENABLED = "rigs"
 CONF_DEVICES_ENABLED = "devices"
-
+CONF_PAYOUTS_ENABLED = "payouts"
 
 # Defaults
 DEFAULT_NAME = NAME
@@ -73,3 +73,5 @@ DEVICE_SPEED_RATE = "device-speed-rate"
 DEVICE_SPEED_ALGORITHM = "device-speed-algorithm"
 DEVICE_LOAD = "device-load"
 DEVICE_RPM = "device-rpm"
+# Payout types
+PAYOUT_USER = "USER"
