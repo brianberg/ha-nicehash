@@ -99,27 +99,25 @@ class DeviceSensor(Entity):
     async def async_update(self):
         """Update entity"""
         await self.coordinator.async_request_refresh()
-        mining_rigs = self.coordinator.data.get("miningRigs")
         try:
+            mining_rigs = self.coordinator.data.get("miningRigs")
             rig = MiningRig(mining_rigs.get(self._rig_id))
-            if rig:
-                device = rig.devices.get(self._device_id)
-                if device:
-                    self._status = device.status
-                    self._load = device.load
-                    self._rpm = device.rpm
-                    self._temperature = device.temperature
-                    algorithms = device.speeds
-                    if len(algorithms) > 0:
-                        algorithm = algorithms[0]
-                        self._algorithm = algorithm.get("title")
-                        self._speed = float(algorithm.get("speed"))
-                        self._speed_title = algorithm.get("title")
-                        self._speed_unit = algorithm.get("displaySuffix")
-                    else:
-                        self._speed_title = "Unknown"
-                        self._speed_unit = "MH"
-                        self._algorithm = None
+            device = rig.devices.get(self._device_id)
+            self._status = device.status
+            self._load = device.load
+            self._rpm = device.rpm
+            self._temperature = device.temperature
+            algorithms = device.speeds
+            if len(algorithms) > 0:
+                algorithm = algorithms[0]
+                self._algorithm = algorithm.get("title")
+                self._speed = float(algorithm.get("speed"))
+                self._speed_title = algorithm.get("title")
+                self._speed_unit = algorithm.get("displaySuffix")
+            else:
+                self._speed_title = "Unknown"
+                self._speed_unit = "MH"
+                self._algorithm = None
         except Exception as e:
             _LOGGER.error(f"Unable to get mining device ({self._device_id})\n{e}")
             self._status = DEVICE_STATUS_UNKNOWN

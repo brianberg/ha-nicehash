@@ -61,14 +61,13 @@ class RigTemperatureSensor(Entity):
     @property
     def state(self):
         """Sensor state"""
-        mining_rigs = self.coordinator.data.get("miningRigs")
         self._highest_temp = 0
         try:
+            mining_rigs = self.coordinator.data.get("miningRigs")
             rig = MiningRig(mining_rigs.get(self._rig_id))
-            if rig:
-                self._temps = rig.temperatures
-                self._num_devices = rig.num_devices
-                self._highest_temp = max(rig.temperatures)
+            self._temps = rig.temperatures
+            self._num_devices = rig.num_devices
+            self._highest_temp = max(rig.temperatures)
         except Exception as e:
             _LOGGER.error(f"Unable to get mining rig ({self._rig_id}) temperature\n{e}")
 
@@ -143,13 +142,12 @@ class RigStatusSensor(Entity):
     @property
     def state(self):
         """Sensor state"""
-        mining_rigs = self.coordinator.data.get("miningRigs")
         status = DEVICE_STATUS_UNKNOWN
         try:
+            mining_rigs = self.coordinator.data.get("miningRigs")
             rig = MiningRig(mining_rigs.get(self._rig_id))
-            if rig:
-                status = rig.status
-                self._status_time = datetime.fromtimestamp(rig.status_time / 1000.0)
+            status = rig.status
+            self._status_time = datetime.fromtimestamp(rig.status_time / 1000.0)
         except Exception as e:
             _LOGGER.error(f"Unable to get mining rig ({self._rig_id}) status\n{e}")
             self._status_time = None
@@ -231,12 +229,11 @@ class RigProfitabilitySensor(Entity):
     @property
     def state(self):
         """Sensor state"""
-        mining_rigs = self.coordinator.data.get("miningRigs")
         try:
+            mining_rigs = self.coordinator.data.get("miningRigs")
             rig = MiningRig(mining_rigs.get(self._rig_id))
-            if rig:
-                self._profitability = rig.profitability
-                self._unpaid_amount = rig.unpaid_amount
+            self._profitability = rig.profitability
+            self._unpaid_amount = rig.unpaid_amount
         except Exception as e:
             _LOGGER.error(f"Unable to get mining rig ({self._rig_id}) status\n{e}")
             self._profitability = 0
