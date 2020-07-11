@@ -22,7 +22,7 @@ SCAN_INTERVAL_ACCOUNTS = timedelta(minutes=60)
 _LOGGER = logging.getLogger(__name__)
 
 
-class NiceHashAccountsDataUpdateCoordinator(DataUpdateCoordinator):
+class AccountsDataUpdateCoordinator(DataUpdateCoordinator):
     """Manages fetching accounts data from NiceHash API"""
 
     def __init__(self, hass: HomeAssistant, client: NiceHashPrivateClient):
@@ -55,7 +55,7 @@ class NiceHashAccountsDataUpdateCoordinator(DataUpdateCoordinator):
             raise UpdateFailed(e)
 
 
-class NiceHashMiningRigsDataUpdateCoordinator(DataUpdateCoordinator):
+class MiningRigsDataUpdateCoordinator(DataUpdateCoordinator):
     """Manages fetching mining rigs data from NiceHash API"""
 
     def __init__(self, hass: HomeAssistant, client: NiceHashPrivateClient):

@@ -26,8 +26,8 @@ from .const import (
 )
 from .nicehash import NiceHashPrivateClient
 from .data_coordinators import (
-    NiceHashAccountsDataUpdateCoordinator,
-    NiceHashMiningRigsDataUpdateCoordinator,
+    AccountsDataUpdateCoordinator,
+    MiningRigsDataUpdateCoordinator,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -67,7 +67,7 @@ async def async_setup(hass: HomeAssistant, config: Config):
 
     client = NiceHashPrivateClient(organization_id, api_key, api_secret)
 
-    accounts_coordinator = NiceHashAccountsDataUpdateCoordinator(hass, client)
+    accounts_coordinator = AccountsDataUpdateCoordinator(hass, client)
 
     await accounts_coordinator.async_refresh()
 
@@ -81,7 +81,7 @@ async def async_setup(hass: HomeAssistant, config: Config):
     hass.data[DOMAIN]["accounts_coordinator"] = accounts_coordinator
 
     if rigs_enabled or devices_enabled:
-        rigs_coordinator = NiceHashMiningRigsDataUpdateCoordinator(hass, client)
+        rigs_coordinator = MiningRigsDataUpdateCoordinator(hass, client)
         await rigs_coordinator.async_refresh()
 
         if not rigs_coordinator.last_update_success:
