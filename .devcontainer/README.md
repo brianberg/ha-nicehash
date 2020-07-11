@@ -2,7 +2,7 @@
 
 The easiest way to get started with custom integration development is to use Visual Studio Code with devcontainers. This approach will create a preconfigured development environment with all the tools you need.
 
-In the container you will have a dedicated Home Assistant core instance running with your custom compnent code. You can configure this instance by updating the `./devcontainer/configuration.yaml` file.
+In the container you will have a dedicated Home Assistant core instance running with your custom compnent code. You can configure this instance by adding a `./devcontainer/configuration.yaml` file.
 
 **Prerequisites**
 
@@ -22,6 +22,7 @@ In the container you will have a dedicated Home Assistant core instance running 
 1. Fork the repository.
 2. Clone the repository to your computer.
 3. Open the repository using Visual Studio code.
+4. Copy `.devcontainer/configuration.tmpl.yaml` to `.devcontainer/configuration.yaml` and update
 
 When you open this repository with Visual Studio code you are asked to "Reopen in Container", this will start the build of the container.
 

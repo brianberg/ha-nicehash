@@ -34,13 +34,13 @@ Report a bug by [opening a new issue](../../issues/new/choose); it's that easy!
 
 - A quick summary and/or background
 - Steps to reproduce
-  - Be specific!
-  - Give sample code if you can.
+  - Be specific
+  - Give sample code if you can
 - What you expected would happen
 - What actually happens
 - Notes (possibly including why you think this might be happening, or stuff you tried that didn't work)
 
-People *love* thorough bug reports. I'm not even kidding.
+People *love* thorough bug reports
 
 ## Use a Consistent Coding Style
 

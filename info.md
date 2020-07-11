@@ -31,12 +31,13 @@ _Component to integrate with [NiceHash][nicehash]_
 1. Add `nicehash` to `configuration.yaml`
    ```
    nicehash:
-     organization_id: <org_id>
-     api_key: <api_key_code>
-     api_secret: <api_secret_key_code>
-     currency: EUR (default = USD)
-     rigs: true (default = false) - Enable rig sensors
-     devices: true (default = false) - Enable device sensors
+     organization_id: # <org_id>
+     api_key: # <api_key_code>
+     api_secret: #<api_secret_key_code>
+     currency: EUR # (default = USD)
+     rigs: true # (default = false) - Enable rig sensors
+     devices: true # (default = false) - Enable device sensors
+     payouts: true # (default = false) - Enable payout sensors
    ```
 
 {% endif %}
