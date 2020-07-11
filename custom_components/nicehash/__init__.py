@@ -26,7 +26,7 @@ from .const import (
     STARTUP_MESSAGE,
 )
 from .nicehash import NiceHashPrivateClient
-from .data_coordinators import (
+from .coordinators import (
     AccountsDataUpdateCoordinator,
     MiningPayoutsDataUpdateCoordinator,
     MiningRigsDataUpdateCoordinator,

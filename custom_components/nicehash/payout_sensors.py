@@ -16,7 +16,7 @@ from .const import (
     NICEHASH_ATTRIBUTION,
     PAYOUT_USER,
 )
-from .data_coordinators import (
+from .coordinators import (
     MiningPayoutsDataUpdateCoordinator,
     MiningRigsDataUpdateCoordinator,
 )

@@ -16,7 +16,7 @@ from .const import (
     ICON_THERMOMETER,
     NICEHASH_ATTRIBUTION,
 )
-from .data_coordinators import MiningRigsDataUpdateCoordinator
+from .coordinators import MiningRigsDataUpdateCoordinator
 from .nicehash import MiningRig
 
 _LOGGER = logging.getLogger(__name__)

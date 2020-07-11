@@ -19,7 +19,7 @@ from .const import (
     ICON_CURRENCY_USD,
     NICEHASH_ATTRIBUTION,
 )
-from .data_coordinators import AccountsDataUpdateCoordinator
+from .coordinators import AccountsDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
 

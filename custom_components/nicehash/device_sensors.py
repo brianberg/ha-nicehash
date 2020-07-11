@@ -19,7 +19,7 @@ from .const import (
     ICON_SPEEDOMETER,
     NICEHASH_ATTRIBUTION,
 )
-from .data_coordinators import MiningRigsDataUpdateCoordinator
+from .coordinators import MiningRigsDataUpdateCoordinator
 from .nicehash import MiningRig, MiningRigDevice
 
 _LOGGER = logging.getLogger(__name__)
