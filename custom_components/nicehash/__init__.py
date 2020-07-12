@@ -84,6 +84,7 @@ async def async_setup(hass: HomeAssistant, config: Config):
 
     # Accounts
     if balances_enabled:
+        _LOGGER.debug("Account balances enabled, fetching accounts...")
         accounts_coordinator = AccountsDataUpdateCoordinator(hass, client)
         await accounts_coordinator.async_refresh()
 
@@ -95,6 +96,7 @@ async def async_setup(hass: HomeAssistant, config: Config):
 
     # Payouts
     if payouts_enabled:
+        _LOGGER.debug("Payouts enabled, fetching payouts data...")
         payouts_coordinator = MiningPayoutsDataUpdateCoordinator(hass, client)
         await payouts_coordinator.async_refresh()
 
@@ -106,6 +108,7 @@ async def async_setup(hass: HomeAssistant, config: Config):
 
     # Rigs
     if rigs_enabled or devices_enabled:
+        _LOGGER.debug("Rigs or devices enabled, fetching rigs...")
         rigs_coordinator = MiningRigsDataUpdateCoordinator(hass, client)
         await rigs_coordinator.async_refresh()
 

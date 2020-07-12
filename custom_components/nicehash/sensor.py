@@ -73,6 +73,7 @@ async def async_setup_platform(
 
     # Payout sensors
     if payouts_enabled:
+        _LOGGER.debug("Payout sensors enabled")
         payouts_coordinator = data.get("payouts_coordinator")
         payout_sensors = create_payout_sensors(organization_id, payouts_coordinator)
         async_add_entities(payout_sensors)
@@ -82,17 +83,21 @@ async def async_setup_platform(
         rigs_coordinator = data.get("rigs_coordinator")
         rig_data = await client.get_mining_rigs()
         mining_rigs = rig_data.get("miningRigs")
+        _LOGGER.debug(f"Found {len(mining_rigs)} rigs")
 
         if rigs_enabled:
+            _LOGGER.debug("Rig sensors enabled")
             rig_sensors = create_rig_sensors(mining_rigs, rigs_coordinator)
             async_add_entities(rig_sensors, True)
 
         if devices_enabled:
+            _LOGGER.debug("Device sensors enabled")
             device_sensors = create_device_sensors(mining_rigs, rigs_coordinator)
             async_add_entities(device_sensors, True)
 
 
 def create_balance_sensors(organization_id, currency, coordinator):
+    _LOGGER.debug(f"Creating BTC account balance sensors")
     balance_sensors = [
         BalanceSensor(
             coordinator,
@@ -114,6 +119,7 @@ def create_balance_sensors(organization_id, currency, coordinator):
         ),
     ]
     if currency == CURRENCY_USD or currency == CURRENCY_EUR:
+        _LOGGER.debug(f"Creating {currency} account balance sensors")
         balance_sensors.append(
             BalanceSensor(
                 coordinator,
@@ -145,6 +151,7 @@ def create_balance_sensors(organization_id, currency, coordinator):
 
 
 def create_payout_sensors(organization_id, coordinator):
+    _LOGGER.debug(f"Creating payout sensors")
     payout_sensors = []
     payout_sensors.append(RecentMiningPayoutSensor(coordinator, organization_id))
 
@@ -155,6 +162,7 @@ def create_rig_sensors(mining_rigs, coordinator):
     rig_sensors = []
     for rig_data in mining_rigs:
         rig = MiningRig(rig_data)
+        _LOGGER.debug(f"Creating {rig.name} ({rig.id}) sensors")
         rig_sensors.append(RigStatusSensor(coordinator, rig))
         rig_sensors.append(RigTemperatureSensor(coordinator, rig))
         rig_sensors.append(RigProfitabilitySensor(coordinator, rig))
@@ -166,7 +174,12 @@ def create_device_sensors(mining_rigs, coordinator):
     device_sensors = []
     for rig_data in mining_rigs:
         rig = MiningRig(rig_data)
-        for device in rig.devices.values():
+        devices = rig.devices.values()
+        _LOGGER.debug(
+            f"Found {len(devices)} device sensor(s) for {rig.name} ({rig.id})"
+        )
+        for device in devices:
+            _LOGGER.debug(f"Creating {device.name} ({device.id}) sensors")
             device_sensors.append(DeviceAlgorithmSensor(coordinator, rig, device))
             device_sensors.append(DeviceSpeedSensor(coordinator, rig, device))
             device_sensors.append(DeviceStatusSensor(coordinator, rig, device))

@@ -37,7 +37,6 @@ class BalanceSensor(Entity):
         balance_type=BALANCE_TYPE_AVAILABLE,
     ):
         """Initialize the sensor"""
-        _LOGGER.debug(f"Account Balance Sensor: {balance_type} {currency}")
         self.coordinator = coordinator
         self.currency = currency
         self.organization_id = organization_id

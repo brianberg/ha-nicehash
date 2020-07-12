@@ -10,12 +10,15 @@ from hashlib import sha256
 import hmac
 import httpx
 import json
+import logging
 import re
 import sys
 from time import mktime
 import uuid
 
 from .const import NICEHASH_API_URL
+
+_LOGGER = logging.getLogger(__name__)
 
 
 def parse_device_name(raw_name):
@@ -77,13 +80,15 @@ class Payout:
 class NiceHashPublicClient:
     async def get_exchange_rates(self):
         exchange_data = await self.request("GET", "/main/api/v2/exchangeRate/list")
-        return exchange_data["list"]
+        return exchange_data.get("list")
 
     async def request(self, method, path, query=None, body=None):
         url = NICEHASH_API_URL + path
 
         if query is not None:
             url += f"?{query}"
+
+        _LOGGER.debug(url)
 
         async with httpx.AsyncClient() as client:
             if body:
@@ -102,11 +107,10 @@ class NiceHashPublicClient:
 
 
 class NiceHashPrivateClient:
-    def __init__(self, organization_id, key, secret, verbose=False):
+    def __init__(self, organization_id, key, secret):
         self.organization_id = organization_id
         self.key = key
         self.secret = secret
-        self.verbose = verbose
 
     async def get_accounts(self):
         return await self.request("GET", "/main/api/v2/accounting/accounts2")
@@ -149,10 +153,9 @@ class NiceHashPrivateClient:
 
             url = NICEHASH_API_URL + path
             if query:
-                url += "?" + query
+                url += f"?{query}"
 
-            if self.verbose:
-                print(method, url)
+            _LOGGER.debug(url)
 
             if data:
                 response = await client.request(method, url, data=data)
