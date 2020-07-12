@@ -10,11 +10,7 @@
 
 _Component to integrate with [NiceHash][nicehash]_
 
-**This component will set up the following platforms**
 
-| Platform | Description                 |
-| -------- | --------------------------- |
-| `sensor` | Show info from NiceHash API |
 
 {% if not installed %}
 

@@ -12,12 +12,6 @@
 
 _Component to integrate with [NiceHash][nicehash]_
 
-**This component will set up the following platforms.**
-
-| Platform | Description                 |
-| -------- | --------------------------- |
-| `sensor` | Show info from NiceHash API |
-
 ## Installation
 
 1. Using the tool of choice open the directory (folder) for your HA configuration (where you find `configuration.yaml`).
