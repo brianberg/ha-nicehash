@@ -9,6 +9,7 @@ from homeassistant.helpers.entity import Entity
 
 from .const import (
     CURRENCY_BTC,
+    DEFAULT_NAME,
     FORMAT_DATETIME,
     ICON_CURRENCY_BTC,
     ICON_PULSE,
@@ -27,7 +28,7 @@ _LOGGER = logging.getLogger(__name__)
 
 class RecentMiningPayoutSensor(Entity):
     """
-    Displays most recent payout of a mining rig
+    Displays most recent mining payout
     """
 
     def __init__(
@@ -45,7 +46,7 @@ class RecentMiningPayoutSensor(Entity):
     @property
     def name(self):
         """Sensor name"""
-        return f"Recent Mining Payout"
+        return f"{DEFAULT_NAME} Recent Mining Payout"
 
     @property
     def unique_id(self):
