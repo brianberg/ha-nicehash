@@ -18,6 +18,7 @@ from .const import (
     CONF_API_SECRET,
     CONF_CURRENCY,
     CONF_ORGANIZATION_ID,
+    CONF_BALANCES_ENABLED,
     CONF_RIGS_ENABLED,
     CONF_DEVICES_ENABLED,
     CONF_PAYOUTS_ENABLED,
@@ -42,6 +43,7 @@ CONFIG_SCHEMA = vol.Schema(
                 vol.Required(CONF_API_KEY): cv.string,
                 vol.Required(CONF_API_SECRET): cv.string,
                 vol.Required(CONF_CURRENCY, default=CURRENCY_USD): cv.string,
+                vol.Required(CONF_BALANCES_ENABLED, default=False): cv.boolean,
                 vol.Required(CONF_RIGS_ENABLED, default=False): cv.boolean,
                 vol.Required(CONF_DEVICES_ENABLED, default=False): cv.boolean,
                 vol.Required(CONF_PAYOUTS_ENABLED, default=False): cv.boolean,
@@ -65,6 +67,7 @@ async def async_setup(hass: HomeAssistant, config: Config):
     api_secret = nicehash_config.get(CONF_API_SECRET)
     # Options
     currency = nicehash_config.get(CONF_CURRENCY).upper()
+    balances_enabled = nicehash_config.get(CONF_BALANCES_ENABLED)
     rigs_enabled = nicehash_config.get(CONF_RIGS_ENABLED)
     devices_enabled = nicehash_config.get(CONF_DEVICES_ENABLED)
     payouts_enabled = nicehash_config.get(CONF_PAYOUTS_ENABLED)
@@ -74,19 +77,21 @@ async def async_setup(hass: HomeAssistant, config: Config):
     hass.data[DOMAIN]["organization_id"] = organization_id
     hass.data[DOMAIN]["client"] = client
     hass.data[DOMAIN]["currency"] = currency
+    hass.data[DOMAIN]["balances_enabled"] = balances_enabled
     hass.data[DOMAIN]["rigs_enabled"] = rigs_enabled
     hass.data[DOMAIN]["devices_enabled"] = devices_enabled
     hass.data[DOMAIN]["payouts_enabled"] = payouts_enabled
 
     # Accounts
-    accounts_coordinator = AccountsDataUpdateCoordinator(hass, client)
-    await accounts_coordinator.async_refresh()
+    if balances_enabled:
+        accounts_coordinator = AccountsDataUpdateCoordinator(hass, client)
+        await accounts_coordinator.async_refresh()
 
-    if not accounts_coordinator.last_update_success:
-        _LOGGER.error("Unable to get NiceHash accounts")
-        raise PlatformNotReady
+        if not accounts_coordinator.last_update_success:
+            _LOGGER.error("Unable to get NiceHash accounts")
+            raise PlatformNotReady
 
-    hass.data[DOMAIN]["accounts_coordinator"] = accounts_coordinator
+        hass.data[DOMAIN]["accounts_coordinator"] = accounts_coordinator
 
     # Payouts
     if payouts_enabled:

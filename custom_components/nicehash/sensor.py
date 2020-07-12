@@ -58,16 +58,18 @@ async def async_setup_platform(
     client = data.get("client")
     # Options
     currency = data.get("currency")
+    balances_enabled = data.get("balances_enabled")
     payouts_enabled = data.get("payouts_enabled")
     rigs_enabled = data.get("rigs_enabled")
     devices_enabled = data.get("devices_enabled")
 
-    # Add account balance sensors
-    accounts_coordinator = data.get("accounts_coordinator")
-    balance_sensors = create_balance_sensors(
-        organization_id, currency, accounts_coordinator
-    )
-    async_add_entities(balance_sensors, True)
+    # Account balance sensors
+    if balances_enabled:
+        accounts_coordinator = data.get("accounts_coordinator")
+        balance_sensors = create_balance_sensors(
+            organization_id, currency, accounts_coordinator
+        )
+        async_add_entities(balance_sensors, True)
 
     # Payout sensors
     if payouts_enabled:
