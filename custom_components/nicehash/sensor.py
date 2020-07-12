@@ -21,7 +21,12 @@ from .const import (
     DEVICE_SPEED_RATE,
     DEVICE_SPEED_ALGORITHM,
 )
-from .nicehash import NiceHashPrivateClient, NiceHashPublicClient
+from .nicehash import (
+    MiningRig,
+    MiningRigDevice,
+    NiceHashPrivateClient,
+    NiceHashPublicClient,
+)
 from .account_sensors import BalanceSensor
 from .payout_sensors import RecentMiningPayoutSensor
 from .rig_sensors import (
@@ -146,7 +151,8 @@ def create_payout_sensors(organization_id, coordinator):
 
 def create_rig_sensors(mining_rigs, coordinator):
     rig_sensors = []
-    for rig in mining_rigs:
+    for rig_data in mining_rigs:
+        rig = MiningRig(rig_data)
         rig_sensors.append(RigStatusSensor(coordinator, rig))
         rig_sensors.append(RigTemperatureSensor(coordinator, rig))
         rig_sensors.append(RigProfitabilitySensor(coordinator, rig))
@@ -156,9 +162,9 @@ def create_rig_sensors(mining_rigs, coordinator):
 
 def create_device_sensors(mining_rigs, coordinator):
     device_sensors = []
-    for rig in mining_rigs:
-        devices = rig.get("devices")
-        for device in devices:
+    for rig_data in mining_rigs:
+        rig = MiningRig(rig_data)
+        for device in rig.devices.values():
             device_sensors.append(DeviceAlgorithmSensor(coordinator, rig, device))
             device_sensors.append(DeviceSpeedSensor(coordinator, rig, device))
             device_sensors.append(DeviceStatusSensor(coordinator, rig, device))

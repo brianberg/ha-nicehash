@@ -33,15 +33,15 @@ class DeviceSensor(Entity):
     def __init__(
         self,
         coordinator: MiningRigsDataUpdateCoordinator,
-        rig_data: dict,
-        device_data: dict,
+        rig: MiningRig,
+        device: MiningRigDevice,
     ):
         """Initialize the sensor"""
         self.coordinator = coordinator
-        self._rig_id = rig_data.get("rigId")
-        self._rig_name = rig_data.get("name")
-        self._device_name = device_data.get("name")
-        self._device_id = device_data.get("id")
+        self._rig_id = rig.id
+        self._rig_name = rig.name
+        self._device_id = device.id
+        self._device_name = device.name
 
     @property
     def name(self):

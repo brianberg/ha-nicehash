@@ -10,6 +10,7 @@ from hashlib import sha256
 import hmac
 import httpx
 import json
+import re
 import sys
 from time import mktime
 import uuid
@@ -17,10 +18,21 @@ import uuid
 from .const import NICEHASH_API_URL
 
 
+def parse_device_name(raw_name):
+    name = re.sub(
+        r"(\s?\(r\))|(\s?\(tm\))|(\s?cpu)|(\s?graphics)|(\s?@.*ghz)",
+        "",
+        raw_name,
+        flags=re.IGNORECASE,
+    )
+
+    return name
+
+
 class MiningRigDevice:
     def __init__(self, data: dict):
-        self.device_id = data.get("id")
-        self.name = data.get("name")
+        self.id = data.get("id")
+        self.name = parse_device_name(data.get("name"))
         self.status = data.get("status").get("description")
         self.temperature = int(data.get("temperature"))
         self.load = float(data.get("load"))
@@ -30,7 +42,7 @@ class MiningRigDevice:
 
 class MiningRig:
     def __init__(self, data: dict):
-        self.rig_id = data.get("rig_id")
+        self.id = data.get("rigId")
         self.name = data.get("name")
         self.status = data.get("minerStatus")
         self.status_time = data.get("statusTime")
@@ -40,9 +52,9 @@ class MiningRig:
         self.unpaid_amount = data.get("unpaidAmount")
         devices = data.get("devices")
         self.num_devices = len(devices)
-        for raw_device in devices:
-            device = MiningRigDevice(raw_device)
-            self.devices[f"{device.device_id}"] = device
+        for device_data in devices:
+            device = MiningRigDevice(device_data)
+            self.devices[f"{device.id}"] = device
             self.temperatures.append(device.temperature)
 
 

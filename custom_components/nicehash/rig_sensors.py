@@ -27,11 +27,11 @@ class RigTemperatureSensor(Entity):
     Displays highest temperature of active mining rig devices
     """
 
-    def __init__(self, coordinator: MiningRigsDataUpdateCoordinator, rig_data: dict):
+    def __init__(self, coordinator: MiningRigsDataUpdateCoordinator, rig: MiningRig):
         """Initialize the sensor"""
         self.coordinator = coordinator
-        self._rig_id = rig_data["rigId"]
-        self._rig_name = rig_data["name"]
+        self._rig_id = rig.id
+        self._rig_name = rig.name
         self._temps = []
         self._num_devices = 0
         _LOGGER.debug(
@@ -110,11 +110,11 @@ class RigStatusSensor(Entity):
     Displays status of a mining rig
     """
 
-    def __init__(self, coordinator: MiningRigsDataUpdateCoordinator, rig_data: dict):
+    def __init__(self, coordinator: MiningRigsDataUpdateCoordinator, rig: MiningRig):
         """Initialize the sensor"""
         self.coordinator = coordinator
-        self._rig_id = rig_data["rigId"]
-        self._rig_name = rig_data["name"]
+        self._rig_id = rig.id
+        self._rig_name = rig.name
         self._status = DEVICE_STATUS_UNKNOWN
         self._status_time = None
         _LOGGER.debug(f"Mining Rig Status Sensor: {self._rig_name} ({self._rig_id})")
@@ -195,11 +195,11 @@ class RigProfitabilitySensor(Entity):
     Displays profitability of a mining rig
     """
 
-    def __init__(self, coordinator: MiningRigsDataUpdateCoordinator, rig_data: dict):
+    def __init__(self, coordinator: MiningRigsDataUpdateCoordinator, rig: MiningRig):
         """Initialize the sensor"""
         self.coordinator = coordinator
-        self._rig_id = rig_data["rigId"]
-        self._rig_name = rig_data["name"]
+        self._rig_id = rig.id
+        self._rig_name = rig.name
         self._profitability = 0
         self._unpaid_amount = 0
         _LOGGER.debug(
