@@ -8,8 +8,8 @@ References:
 from datetime import datetime
 from hashlib import sha256
 import hmac
+import httpx
 import json
-import requests_async as requests
 import sys
 from time import mktime
 import uuid
@@ -75,12 +75,12 @@ class NiceHashPublicClient:
         if query is not None:
             url += f"?{query}"
 
-        async with requests.Session() as session:
+        async with httpx.AsyncClient() as client:
             if body:
                 data = json.dumps(body)
-                response = await session.request(method, url, data=data)
+                response = await client.request(method, url, data=data)
             else:
-                response = await session.request(method, url)
+                response = await client.request(method, url)
 
             if response.status_code == 200:
                 return response.json()
@@ -134,8 +134,8 @@ class NiceHashPrivateClient:
             "X-Request-Id": str(uuid.uuid4()),
         }
 
-        async with requests.Session() as session:
-            session.headers = headers
+        async with httpx.AsyncClient() as client:
+            client.headers = headers
 
             url = NICEHASH_API_URL + path
             if query:
@@ -145,9 +145,9 @@ class NiceHashPrivateClient:
                 print(method, url)
 
             if data:
-                response = await session.request(method, url, data=data)
+                response = await client.request(method, url, data=data)
             else:
-                response = await session.request(method, url)
+                response = await client.request(method, url)
 
             if response.status_code == 200:
                 return response.json()

@@ -8,6 +8,6 @@
     "@brianberg"
   ],
   "requirements": [
-    "requests_async"
+    "httpx"
   ]
 }
