@@ -46,16 +46,14 @@ class MiningRig:
         self.name = data.get("name")
         self.status = data.get("minerStatus")
         self.status_time = data.get("statusTime")
-        self.devices = dict()
-        self.temperatures = []
         self.profitability = data.get("profitability")
         self.unpaid_amount = data.get("unpaidAmount")
         devices = data.get("devices")
         self.num_devices = len(devices)
+        self.devices = dict()
         for device_data in devices:
             device = MiningRigDevice(device_data)
             self.devices[f"{device.id}"] = device
-            self.temperatures.append(device.temperature)
 
 
 class Payout:

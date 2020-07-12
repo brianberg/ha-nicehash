@@ -97,9 +97,9 @@ class RigTemperatureSensor(RigSensor):
         self._highest_temp = 0
         rig = self._get_rig()
         if rig:
-            self._temps = rig.temperatures
             self._num_devices = rig.num_devices
-            self._highest_temp = max(rig.temperatures)
+            self._temps = [device.temperature for device in rig.devices.values()]
+            self._highest_temp = max(self._temps)
 
         return self._highest_temp
 
