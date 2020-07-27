@@ -83,7 +83,7 @@ class RecentMiningPayoutSensor(Entity):
             self._amount = 0.00
             self._fee = 0.00
 
-        return self._amount
+        return self._amount - self._fee
 
     @property
     def icon(self):

@@ -64,8 +64,8 @@ class Payout:
         self.id = data.get("id")
         self.currency = "Unknown"
         self.created = data.get("created")
-        self.amount = data.get("amount")
-        self.fee = data.get("feeAmount")
+        self.amount = float(data.get("amount"))
+        self.fee = float(data.get("feeAmount"))
         self.account_type = "Unknown"
         # Currency
         currency = data.get("currency")
