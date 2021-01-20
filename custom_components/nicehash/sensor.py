@@ -30,9 +30,12 @@ from .nicehash import (
 from .account_sensors import BalanceSensor
 from .payout_sensors import RecentMiningPayoutSensor
 from .rig_sensors import (
-    RigStatusSensor,
-    RigTemperatureSensor,
+    RigAlgorithmSensor,
+    RigHighTemperatureSensor,
+    RigLowTemperatureSensor,
     RigProfitabilitySensor,
+    RigStatusSensor,
+    RigSpeedSensor,
 )
 from .device_sensors import (
     DeviceAlgorithmSensor,
@@ -158,14 +161,17 @@ def create_payout_sensors(organization_id, coordinator):
     return payout_sensors
 
 
-def create_rig_sensors(mining_rigs, coordinator):
+def create_rig_sensors(mining_rigs, coordinator, algorithms=[]):
     rig_sensors = []
     for rig_data in mining_rigs:
         rig = MiningRig(rig_data)
         _LOGGER.debug(f"Creating {rig.name} ({rig.id}) sensors")
-        rig_sensors.append(RigStatusSensor(coordinator, rig))
-        rig_sensors.append(RigTemperatureSensor(coordinator, rig))
+        rig_sensors.append(RigAlgorithmSensor(coordinator, rig))
+        rig_sensors.append(RigHighTemperatureSensor(coordinator, rig))
+        rig_sensors.append(RigLowTemperatureSensor(coordinator, rig))
         rig_sensors.append(RigProfitabilitySensor(coordinator, rig))
+        rig_sensors.append(RigSpeedSensor(coordinator, rig))
+        rig_sensors.append(RigStatusSensor(coordinator, rig))
 
     return rig_sensors
 

@@ -14,6 +14,8 @@ from .const import (
     ICON_CURRENCY_BTC,
     ICON_EXCAVATOR,
     ICON_PULSE,
+    ICON_PICKAXE,
+    ICON_SPEEDOMETER,
     ICON_THERMOMETER,
     NICEHASH_ATTRIBUTION,
 )
@@ -72,7 +74,7 @@ class RigSensor(Entity):
             _LOGGER.error(f"Unable to get mining rig ({self._rig_id})\n{e}")
 
 
-class RigTemperatureSensor(RigSensor):
+class RigHighTemperatureSensor(RigSensor):
     """
     Displays highest temperature of active mining rig devices
     """
@@ -89,7 +91,7 @@ class RigTemperatureSensor(RigSensor):
     @property
     def unique_id(self):
         """Unique entity id"""
-        return f"{self._rig_id}:temperature"
+        return f"{self._rig_id}:high_temperature"
 
     @property
     def state(self):
@@ -98,7 +100,10 @@ class RigTemperatureSensor(RigSensor):
         rig = self._get_rig()
         if rig:
             self._num_devices = rig.num_devices
-            self._temps = [device.temperature for device in rig.devices.values()]
+            self._temps = []
+            for device in rig.devices.values():
+                if device.temperature > -1:
+                    self._temps.append(device.temperature)
             self._highest_temp = max(self._temps)
 
         return self._highest_temp
@@ -120,6 +125,62 @@ class RigTemperatureSensor(RigSensor):
         return {
             ATTR_ATTRIBUTION: NICEHASH_ATTRIBUTION,
             "highest_temperature": self._highest_temp,
+            "temperatures": self._temps,
+            "total_devices": self._num_devices,
+        }
+
+
+class RigLowTemperatureSensor(RigSensor):
+    """
+    Displays lowest temperature of active mining rig devices
+    """
+
+    _temps = []
+    _num_devices = 0
+    _lowest_temp = 0
+
+    @property
+    def name(self):
+        """Sensor name"""
+        return f"{self._rig_name} Low Temperature"
+
+    @property
+    def unique_id(self):
+        """Unique entity id"""
+        return f"{self._rig_id}:low_temperature"
+
+    @property
+    def state(self):
+        """Sensor state"""
+        self._lowest_temp = 0
+        rig = self._get_rig()
+        if rig:
+            self._num_devices = rig.num_devices
+            self._temps = []
+            for device in rig.devices.values():
+                if device.temperature > -1:
+                    self._temps.append(device.temperature)
+            self._lowest_temp = min(self._temps)
+
+        return self._lowest_temp
+
+    @property
+    def icon(self):
+        """Sensor icon"""
+        return ICON_THERMOMETER
+
+    @property
+    def unit_of_measurement(self):
+        """Sensor unit of measurement"""
+        # Not Celsius because then HA might convert to Fahrenheit
+        return "C"
+
+    @property
+    def device_state_attributes(self):
+        """Sensor device state attributes"""
+        return {
+            ATTR_ATTRIBUTION: NICEHASH_ATTRIBUTION,
+            "lowest_temperature": self._lowest_temp,
             "temperatures": self._temps,
             "total_devices": self._num_devices,
         }
@@ -231,3 +292,101 @@ class RigProfitabilitySensor(RigSensor):
             "profitability": self._profitability,
             "unpaid_amount": self._unpaid_amount,
         }
+
+
+class RigAlgorithmSensor(RigSensor):
+    """
+    Displays primary algorithm of a mining rig
+    """
+
+    _algorithms = []
+
+    @property
+    def name(self):
+        """Sensor name"""
+        return f"{self._rig_name} Algorithm"
+
+    @property
+    def unique_id(self):
+        """Unique entity id"""
+        return f"{self._rig_id}:algorithm"
+
+    @property
+    def state(self):
+        """Sensor state"""
+        rig = self._get_rig()
+        if rig:
+            algorithms = rig.get_algorithms()
+            self._algorithms = [*algorithms.keys()]
+            if len(self._algorithms) > 0:
+                return ", ".join(self._algorithms)
+            return "Unknown"
+
+    @property
+    def icon(self):
+        """Sensor icon"""
+        return ICON_PICKAXE
+
+    @property
+    def device_state_attributes(self):
+        """Sensor device state attributes"""
+        return {ATTR_ATTRIBUTION: NICEHASH_ATTRIBUTION, "algorithms": self._algorithms}
+
+
+class RigSpeedSensor(RigSensor):
+    """
+    Displays rig's highest algorithm speed of active mining rig devices
+    """
+
+    _algorithm = "Unknown"
+    _speed = 0
+    _unit = "MH/s"
+
+    @property
+    def name(self):
+        """Sensor name"""
+        return f"{self._rig_name} Speed"
+
+    @property
+    def unique_id(self):
+        """Unique entity id"""
+        return f"{self._rig_id}:speed"
+
+    @property
+    def state(self):
+        """Sensor state"""
+        self._speed = 0
+        rig = self._get_rig()
+        if rig:
+            algorithms = rig.get_algorithms()
+            for key in algorithms.keys():
+                algo = algorithms.get(key)
+                if algo.speed > self._speed:
+                    self._algorithm = algo.name
+                    self._speed = algo.speed
+                    self._unit = algo.unit
+            print(self._algorithm)
+            print(self._speed)
+
+        return self._speed
+
+    @property
+    def icon(self):
+        """Sensor icon"""
+        return ICON_SPEEDOMETER
+
+    @property
+    def unit_of_measurement(self):
+        """Sensor unit of measurement"""
+        return None
+
+    @property
+    def device_state_attributes(self):
+        """Sensor device state attributes"""
+        return {
+            ATTR_ATTRIBUTION: NICEHASH_ATTRIBUTION,
+            "algorithm": self._algorithm,
+            "speed": self._speed,
+            "unit": self._unit,
+        }
+

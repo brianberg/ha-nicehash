@@ -32,6 +32,14 @@ def parse_device_name(raw_name):
     return name
 
 
+class MiningAlgorithm:
+    def __init__(self, data: dict):
+        self.name = data.get("title")
+        self.speed = float(data.get("speed"))
+        unit = data.get("displaySuffix")
+        self.unit = f"{unit}/s"
+
+
 class MiningRigDevice:
     def __init__(self, data: dict):
         self.id = data.get("id")
@@ -57,6 +65,19 @@ class MiningRig:
         for device_data in devices:
             device = MiningRigDevice(device_data)
             self.devices[f"{device.id}"] = device
+
+    def get_algorithms(self):
+        algorithms = dict()
+        for device in self.devices.values():
+            if len(device.speeds) > 0:
+                algo = MiningAlgorithm(device.speeds[0])
+                existingAlgo = algorithms.get(algo.name)
+                if existingAlgo:
+                    existingAlgo.speed += algo.speed
+                else:
+                    algorithms[algo.name] = algo
+
+        return algorithms
 
 
 class Payout:
