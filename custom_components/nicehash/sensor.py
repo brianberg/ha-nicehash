@@ -161,7 +161,7 @@ def create_payout_sensors(organization_id, coordinator):
     return payout_sensors
 
 
-def create_rig_sensors(mining_rigs, coordinator, algorithms=[]):
+def create_rig_sensors(mining_rigs, coordinator):
     rig_sensors = []
     for rig_data in mining_rigs:
         rig = MiningRig(rig_data)

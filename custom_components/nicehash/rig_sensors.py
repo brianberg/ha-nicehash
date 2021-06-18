@@ -104,7 +104,8 @@ class RigHighTemperatureSensor(RigSensor):
             for device in rig.devices.values():
                 if device.temperature > -1:
                     self._temps.append(device.temperature)
-            self._highest_temp = max(self._temps)
+            if len(self._temps) > 0:
+                self._highest_temp = max(self._temps)
 
         return self._highest_temp
 
@@ -160,7 +161,8 @@ class RigLowTemperatureSensor(RigSensor):
             for device in rig.devices.values():
                 if device.temperature > -1:
                     self._temps.append(device.temperature)
-            self._lowest_temp = min(self._temps)
+            if len(self._temps) > 0:
+                self._lowest_temp = min(self._temps)
 
         return self._lowest_temp
 
@@ -365,8 +367,6 @@ class RigSpeedSensor(RigSensor):
                     self._algorithm = algo.name
                     self._speed = algo.speed
                     self._unit = algo.unit
-            print(self._algorithm)
-            print(self._speed)
 
         return self._speed
 

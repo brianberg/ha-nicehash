@@ -16,7 +16,7 @@ import sys
 from time import mktime
 import uuid
 
-from .const import NICEHASH_API_URL
+from .const import MAX_TWO_BYTES, NICEHASH_API_URL
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ class MiningRigDevice:
         self.id = data.get("id")
         self.name = parse_device_name(data.get("name"))
         self.status = data.get("status").get("description")
-        self.temperature = int(data.get("temperature"))
+        self.temperature = int(data.get("temperature")) % MAX_TWO_BYTES
         self.load = float(data.get("load"))
         self.rpm = float(data.get("revolutionsPerMinute"))
         self.speeds = data.get("speeds")
@@ -60,11 +60,15 @@ class MiningRig:
         self.profitability = data.get("profitability")
         self.unpaid_amount = data.get("unpaidAmount")
         devices = data.get("devices")
-        self.num_devices = len(devices)
-        self.devices = dict()
-        for device_data in devices:
-            device = MiningRigDevice(device_data)
-            self.devices[f"{device.id}"] = device
+        if devices is not None:
+            self.num_devices = len(devices)
+            self.devices = dict()
+            for device_data in devices:
+                device = MiningRigDevice(device_data)
+                self.devices[f"{device.id}"] = device
+        else:
+            self.num_devices = 0
+            self.devices = dict()
 
     def get_algorithms(self):
         algorithms = dict()

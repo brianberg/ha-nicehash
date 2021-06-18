@@ -77,3 +77,5 @@ DEVICE_LOAD = "device-load"
 DEVICE_RPM = "device-rpm"
 # Payout types
 PAYOUT_USER = "USER"
+# Magic numbers
+MAX_TWO_BYTES = 65536
