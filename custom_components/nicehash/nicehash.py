@@ -150,6 +150,13 @@ class NiceHashPrivateClient:
         query = f"size={size}"
         return await self.request("GET", "/main/api/v2/mining/rigs/payouts", query)
 
+    async def toggle_device(self, device_id, action, rig_id):
+        query = ""
+        body = {"deviceId":device_id,
+                "action":action,
+                "rigId":rig_id}
+        return await self.request("POST", "/main/api/v2/mining/rigs/status2", query, body)
+
     async def request(self, method, path, query="", body=None):
         xtime = self.get_epoch_ms_from_now()
         xnonce = str(uuid.uuid4())
