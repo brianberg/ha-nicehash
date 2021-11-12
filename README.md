@@ -46,6 +46,8 @@ Supported API permissions and associated sensors
     - Account balance sensors
   - Mining Permissions > View mining data...
     - Rig, device, and payout sensors
+  - Mining Permissions > Manage Rigs
+    - Device start/stop switch
 
 See this [repository](https://github.com/nicehash/rest-clients-demo) for further assistance generating an API key.
 

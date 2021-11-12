@@ -118,6 +118,8 @@ async def async_setup(hass: HomeAssistant, config: Config):
 
         hass.data[DOMAIN]["rigs_coordinator"] = rigs_coordinator
 
+    await discovery.async_load_platform(hass, "switch", DOMAIN, {}, config)
     await discovery.async_load_platform(hass, "sensor", DOMAIN, {}, config)
+    
 
     return True
