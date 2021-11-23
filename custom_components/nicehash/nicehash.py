@@ -125,7 +125,7 @@ class NiceHashPublicClient:
             if response.status_code == 200:
                 return response.json()
             else:
-                err_messages = [str(response.status_code), response.reason]
+                err_messages = [str(response.status_code), response.reason_phrase]
                 if response.content:
                     err_messages.append(str(response.content))
                     raise Exception(": ".join(err_messages))
@@ -190,7 +190,7 @@ class NiceHashPrivateClient:
             if response.status_code == 200:
                 return response.json()
             else:
-                err_messages = [str(response.status_code), response.reason]
+                err_messages = [str(response.status_code), response.reason_phrase]
                 if response.content:
                     err_messages.append(str(response.content))
                     raise Exception(": ".join(err_messages))
