@@ -1,0 +1,32 @@
+{
+  "config": {
+    "title": "NiceHash",
+    "step": {
+      "user": {
+        "title": "NiceHash",
+        "description": "Wenn du Hilfe mit der Konfiguration brauchst, schaue hier nach: https://github.com/brianberg/ha-nicehash",
+        "data": {
+          "organization_id": "Organization ID",
+          "api_key": "API Key Code",
+          "api_secret": "API Secret Key Code"
+        }
+      }
+    },
+    "error": {
+      "auth": "Die Anmeldedaten sind ungültig.",
+      "name_exists": "Die Konfiguration ist bereits angelegt."
+    },
+    "abort": {
+      "single_instance_allowed": "Es ist nur eine Instanz von NiceHash erlaubt."
+    }
+  },
+  "options": {
+    "step": {
+      "user": {
+        "data": {
+          "sensor": "Sensor aktiviert"
+        }
+      }
+    }
+  }
+}
