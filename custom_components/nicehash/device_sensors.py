@@ -423,7 +423,7 @@ class DevicePowerSensor(DeviceSensor):
         """Sensor device state attributes"""
         return {
             ATTR_ATTRIBUTION: NICEHASH_ATTRIBUTION,
-            "rpm": self._power,
+            "power": self._power,
             "rig": self._rig_name,
         }
 
