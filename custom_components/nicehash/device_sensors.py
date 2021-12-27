@@ -156,7 +156,7 @@ class DeviceSpeedSensor(DeviceSensor):
         if device and len(device.speeds) > 0:
             algorithm = device.speeds[0]
             self._algorithm = algorithm.get("title")
-            self._speed = algorithm.get("speed")
+            self._speed = float(algorithm.get("speed"))
             self._speed_unit = algorithm.get("displaySuffix")
         else:
             self._algorithm = "Unknown"
