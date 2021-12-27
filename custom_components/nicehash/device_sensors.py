@@ -17,6 +17,7 @@ from .const import (
     ICON_PULSE,
     ICON_THERMOMETER,
     ICON_SPEEDOMETER,
+    ICON_POWER,
     NICEHASH_ATTRIBUTION,
 )
 from .coordinators import MiningRigsDataUpdateCoordinator
@@ -378,6 +379,51 @@ class DeviceRPMSensor(DeviceSensor):
         return {
             ATTR_ATTRIBUTION: NICEHASH_ATTRIBUTION,
             "rpm": self._rpm,
+            "rig": self._rig_name,
+        }
+
+class DevicePowerSensor(DeviceSensor):
+    """
+    Displays power of a mining rig device
+    """
+
+    @property
+    def name(self):
+        """Sensor name"""
+        return f"{self._device_name} Power"
+
+    @property
+    def unique_id(self):
+        """Unique entity id"""
+        return f"{self._device_id}:power"
+
+    @property
+    def state(self):
+        """Sensor state"""
+        device = self._get_device()
+        if device:
+            self._power = device.power
+        else:
+            self._power = 0
+
+        return self._power
+
+    @property
+    def icon(self):
+        """Sensor icon"""
+        return ICON_POWER
+
+    @property
+    def unit_of_measurement(self):
+        """Sensor unit of measurement"""
+        return "W"
+
+    @property
+    def device_state_attributes(self):
+        """Sensor device state attributes"""
+        return {
+            ATTR_ATTRIBUTION: NICEHASH_ATTRIBUTION,
+            "power": self._power,
             "rig": self._rig_name,
         }
 

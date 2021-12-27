@@ -30,6 +30,7 @@ A [Home Assistant][homeassistant] integration that creates a collection of [Nice
     - Temperature
     - Load
     - RPM
+    - Power
   - Most Recent Mining Payout
 
 None of the sensors are added by default. See installation instructions for available configuration options.
