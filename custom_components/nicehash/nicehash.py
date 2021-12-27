@@ -49,6 +49,7 @@ class MiningRigDevice:
         self.load = float(data.get("load"))
         self.rpm = float(data.get("revolutionsPerMinute"))
         self.speeds = data.get("speeds")
+        self.power = float(data.get("powerUsage"))
 
 
 class MiningRig:
