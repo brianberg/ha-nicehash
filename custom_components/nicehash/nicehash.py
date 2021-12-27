@@ -46,7 +46,7 @@ class MiningRigDevice:
         self.name = parse_device_name(data.get("name"))
         self.status = data.get("status").get("description")
         self.temperature = int(data.get("temperature")) % MAX_TWO_BYTES
-        self.hotspot_temperature = round(int(data.get("temperature")) / MAX_TWO_BYTES, 2)
+        self.hotspot_temperature = round(int(data.get("temperature")) / MAX_TWO_BYTES)
         self.load = float(data.get("load"))
         self.rpm = float(data.get("revolutionsPerMinute"))
         self.speeds = data.get("speeds")
