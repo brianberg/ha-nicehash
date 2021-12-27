@@ -50,6 +50,7 @@ class MiningRigDevice:
         self.load = float(data.get("load"))
         self.rpm = float(data.get("revolutionsPerMinute"))
         self.speeds = data.get("speeds")
+        self.power = float(data.get("powerUsage"))
 
 
 class MiningRig:
@@ -142,7 +143,13 @@ class NiceHashPrivateClient:
         return await self.request("GET", "/main/api/v2/accounting/accounts2")
 
     async def get_mining_rigs(self):
-        return await self.request("GET", "/main/api/v2/mining/rigs2")
+        data = await self.request("GET", "/main/api/v2/mining/rigs2")
+        mining_rigs = data.get("miningRigs")
+        for mining_rig in mining_rigs:
+            devices = mining_rig.get("devices")
+            for device in devices:
+                device["id"] = str(mining_rig.get("rigId")) + "_" + str(device.get("id"))
+        return data
 
     async def get_mining_rig(self, rig_id):
         return await self.request("GET", f"/main/api/v2/mining/rig2/{rig_id}")

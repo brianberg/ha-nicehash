@@ -39,6 +39,7 @@ from .rig_sensors import (
 )
 from .device_sensors import (
     DeviceAlgorithmSensor,
+    DevicePowerSensor,
     DeviceSpeedSensor,
     DeviceStatusSensor,
     DeviceLoadSensor,
@@ -194,5 +195,6 @@ def create_device_sensors(mining_rigs, coordinator):
             device_sensors.append(DeviceLoadSensor(coordinator, rig, device))
             device_sensors.append(DeviceRPMSensor(coordinator, rig, device))
             device_sensors.append(DeviceHotspotTemperatureSensor(coordinator, rig, device))
+            device_sensors.append(DevicePowerSensor(coordinator, rig, device))
 
     return device_sensors
