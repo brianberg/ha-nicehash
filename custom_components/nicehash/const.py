@@ -19,6 +19,7 @@ ICON_PICKAXE = "mdi:pickaxe"
 ICON_PULSE = "mdi:pulse"
 ICON_THERMOMETER = "mdi:thermometer"
 ICON_SPEEDOMETER = "mdi:speedometer"
+ICON_POWER = "mdi:power-plug"
 
 # Platforms
 SENSOR = "sensor"
