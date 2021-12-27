@@ -28,6 +28,7 @@ A [Home Assistant][homeassistant] integration that creates a collection of [Nice
     - Algorithm
     - Speed
     - Temperature
+    - HotSpot Temperature
     - Load
     - RPM
   - Most Recent Mining Payout

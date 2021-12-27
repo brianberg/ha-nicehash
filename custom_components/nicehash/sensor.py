@@ -44,6 +44,7 @@ from .device_sensors import (
     DeviceLoadSensor,
     DeviceRPMSensor,
     DeviceTemperatureSensor,
+    DeviceHotspotTemperatureSensor
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -190,6 +191,7 @@ def create_device_sensors(mining_rigs, coordinator):
             device_sensors.append(DeviceSpeedSensor(coordinator, rig, device))
             device_sensors.append(DeviceStatusSensor(coordinator, rig, device))
             device_sensors.append(DeviceTemperatureSensor(coordinator, rig, device))
+            device_sensors.append(DeviceHotspotTemperatureSensor(coordinator, rig, device))
             device_sensors.append(DeviceLoadSensor(coordinator, rig, device))
             device_sensors.append(DeviceRPMSensor(coordinator, rig, device))
 
