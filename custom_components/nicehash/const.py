@@ -57,6 +57,23 @@ NICEHASH_ATTRIBUTION = "Data provided by NiceHash"
 CURRENCY_BTC = "BTC"
 CURRENCY_USD = "USD"
 CURRENCY_EUR = "EUR"
+SUPPORTED_CURRENCIES = [
+    "ERN","HKD","GGP","RSD","SHP","USD","MYR","PYG","RON","DOP","TWD","AWG",
+    "CVE","BND","RUB","NGN","XCD","JEP","ZWL","HNL","NZD","AFN","MUR","DKK",
+    "CNY","JOD","CHF","COP","XAF","XAG","ZMK","GNF","ZMW","GIP","BTC","MKD",
+    "WST","IDR","IQD","BHD","YER","MAD","KGS","PHP","PEN","BMD","DJF","MVR",
+    "QAR","JPY","SCR","IMP","KRW","HRK","SOS","VUV","NIO","KYD","LAK","ISK",
+    "BOB","IRR","NPR","EGP","BBD","CAD","XAU","CUP","SDG","PKR","UZS","CLF",
+    "CUC","STD","MGA","FJD","DZD","TJS","EURKM","SZL","THB","SRD","BDT",
+    "BTN","CZK","AMD","UGX","TRY","AUD","UAH","HUF","SLL","VND","RWF","LBP",
+    "ANG","SAR","LVL","KHR","BYR","TTD","OMR","LTL","GTQ","ALL","MRO","MWK",
+    "LSL","SBD","BGN","LRD","JMD","CRC","ETB","NAD","GYD","LKR","INR","SEK",
+    "KES","KMF","VEF","ARS","HTG","BAM","BWP","GEL","KZT","AED","KWD","XDR",
+    "EUR","TND","MDL","LYD","BSD","GHS","MOP","PAB","ZAR","AZN","TOP","SVC",
+    "KPW","TMT","BZD","GMD","XOF","UYU","MNT","NOK","XPF","BIF","BYN","FKP",
+    "GBP","MXN","SYP","PGK","MZN","PLN","MMK","SGD","AOA","ILS","CLP","TZS",
+    "CDF","BRL"
+]
 # Balance type
 BALANCE_TYPE_AVAILABLE = "available"
 BALANCE_TYPE_PENDING = "pending"

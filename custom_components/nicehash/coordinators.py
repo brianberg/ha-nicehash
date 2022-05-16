@@ -12,6 +12,7 @@ from homeassistant.helpers.update_coordinator import (
 
 from .const import (
     CURRENCY_BTC,
+    CURRENCY_USD,
     DOMAIN,
 )
 from .nicehash import NiceHashPrivateClient, NiceHashPublicClient
@@ -41,13 +42,25 @@ class AccountsDataUpdateCoordinator(DataUpdateCoordinator):
             accounts = await self._client.get_accounts()
             exchange_rates = await NiceHashPublicClient().get_exchange_rates()
             rates_dict = dict()
+
+            # NiceHash supports BTC->USD and BTC->EUR only.
             for rate in exchange_rates:
                 fromCurrency = rate.get("fromCurrency")
-                # Only care about the Bitcoin exchange rates
                 if fromCurrency == CURRENCY_BTC:
                     toCurrency = rate.get("toCurrency")
                     exchange_rate = float(rate.get("exchangeRate"))
                     rates_dict[f"{fromCurrency}-{toCurrency}"] = exchange_rate
+
+            # For non-USD/EUR currencies, get exchange rate using USD as an intermediary. e.g. BTC->USD->CAD
+            btc_to_usd_rate = rates_dict[f"BTC-USD"]
+            for rate in exchange_rates:
+                fromCurrency = rate.get("fromCurrency")
+                if fromCurrency == CURRENCY_USD:
+                    toCurrency = rate.get("toCurrency")
+                    exchange_rate = float(rate.get("exchangeRate")) * btc_to_usd_rate
+                    if f"{CURRENCY_BTC}-{toCurrency}" not in rates_dict:
+                        rates_dict[f"{CURRENCY_BTC}-{toCurrency}"] = exchange_rate
+
             return {
                 "accounts": accounts,
                 "exchange_rates": rates_dict,

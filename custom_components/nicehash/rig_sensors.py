@@ -378,7 +378,7 @@ class RigSpeedSensor(RigSensor):
     @property
     def unit_of_measurement(self):
         """Sensor unit of measurement"""
-        return None
+        return f"{self._unit}"
 
     @property
     def device_state_attributes(self):

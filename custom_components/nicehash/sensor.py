@@ -20,6 +20,7 @@ from .const import (
     DEVICE_RPM,
     DEVICE_SPEED_RATE,
     DEVICE_SPEED_ALGORITHM,
+    SUPPORTED_CURRENCIES,
 )
 from .nicehash import (
     MiningRig,
@@ -121,7 +122,7 @@ def create_balance_sensors(organization_id, currency, coordinator):
             balance_type=BALANCE_TYPE_TOTAL,
         ),
     ]
-    if currency == CURRENCY_USD or currency == CURRENCY_EUR:
+    if currency in SUPPORTED_CURRENCIES:
         _LOGGER.debug(f"Creating {currency} account balance sensors")
         balance_sensors.append(
             BalanceSensor(
@@ -148,8 +149,7 @@ def create_balance_sensors(organization_id, currency, coordinator):
             )
         )
     else:
-        _LOGGER.warn("Invalid currency: must be EUR or USD")
-
+        _LOGGER.warn("Currency is invalid.")
     return balance_sensors
 
 
