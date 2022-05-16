@@ -102,7 +102,10 @@ class BalanceSensor(Entity):
             return ICON_CURRENCY_EUR
         elif self.currency == CURRENCY_USD:
             return ICON_CURRENCY_USD
-        return ICON_CURRENCY_BTC
+        elif self.currency == CURRENCY_BTC:
+            return ICON_CURRENCY_BTC
+
+        return ICON_CURRENCY_USD
 
     @property
     def unit_of_measurement(self):
